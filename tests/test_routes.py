@@ -7,10 +7,14 @@ from unittest import TestCase
 from wsgi import app
 from service.common import status
 from service.models import db, YourResourceModel
+from requests import Request
+
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
 )
+
+BASE_URL = "/orders"
 
 
 ######################################################################
@@ -58,6 +62,26 @@ class TestYourResourceService(TestCase):
 
     def test_create(self):
         """ 
-        It should call the method to create a resource and return a 201 status code
+        It should call the method to create an order and return a 201 status code
         if created
         """
+        order = OrderFactory()
+        item = ItemFactory(order=order)
+        order.items.append(item)
+        order.create()
+
+        response = self.client.post(
+            BASE_URL, json=order.serialize(), content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        order_data = response.get_json()
+
+        # self.assertEqual(order_data["item_ids"], order.items, "Names does not match")
+        self.assertEqual(
+            order_data["customer_id"],
+            order.customer_id,
+            "customer id does not match",
+        )
+        self.assertEqual(order_data["items"], order.items, "Items does not match")

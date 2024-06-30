@@ -26,10 +26,11 @@ from flask import current_app as app  # Import Flask application
 from service.models import Order, Item
 from service.common import status  # HTTP Status Codes
 
-
 ######################################################################
 # GET INDEX
 ######################################################################
+
+
 @app.route("/orders")
 def index():
     """Root URL response"""
@@ -50,19 +51,29 @@ def order():
 
     if request.method == 'POST':
         """ This method creates an order item given the items and their quantities """
-        """ Assume POST request json data to have keys: 
-            item IDs: int arr, 
-            quantities: int arr, 
-            prices: float arr, 
+        """ Assume POST request json data to have keys:
+            item_ids: int arr,
+            quantities: int arr,
             customer ID: int
         """
     data = request.json
 
-    order = OrderFactory()
-    for item, quant, price in zip(data["items"], data["quantities"], data["prices"]):
-        new_item = ItemFactory(order=order)
+    order = Order()
+    for item, quant in zip(data["item_ids"], data["quantities"], data["prices"]):
+        new_item = Item()
+        new_item.order_id = order.id
+        new_item.product_id = item
+        new_item.quantity = quant
+        order.items.append(new_item)
+
+    order.customer_id = data["customer_id"]
 
     return (
-        "This is the root for the Orders API. The REST API provides the functionality to create, update, delete and update orders and order items",
-        status.HTTP_200_OK,
+        {
+            "message": "Order created successfully",
+            "items": data["item_ids"],
+            "quantities": data["quantities"],
+            "prices": data["prices"]
+        },
+        status.HTTP_201_CREATED,
     )
