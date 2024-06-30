@@ -15,10 +15,10 @@
 ######################################################################
 
 """
-Pet Store Service
+Orders Service
 
 This service implements a REST API that allows you to Create, Read, Update
-and Delete Pets from the inventory of pets in the PetShop
+and Delete Orders
 """
 
 from flask import jsonify, request, url_for, abort
@@ -30,11 +30,11 @@ from service.common import status  # HTTP Status Codes
 ######################################################################
 # GET INDEX
 ######################################################################
-@app.route("/")
+@app.route("/orders")
 def index():
     """Root URL response"""
     return (
-        "Reminder: return some useful information in json format about the service here",
+        "This is the root for the Orders API. The REST API provides the functionality to create, update, delete and update orders and order items",
         status.HTTP_200_OK,
     )
 
@@ -44,3 +44,25 @@ def index():
 ######################################################################
 
 # Todo: Place your REST API code here ...
+
+@app.route("/orders", methods=['GET', 'POST', 'PUT', 'DELETE'])
+def order():
+
+    if request.method == 'POST':
+        """ This method creates an order item given the items and their quantities """
+        """ Assume POST request json data to have keys: 
+            item IDs: int arr, 
+            quantities: int arr, 
+            prices: float arr, 
+            customer ID: int
+        """
+    data = request.json
+
+    order = OrderFactory()
+    for item, quant, price in zip(data["items"], data["quantities"], data["prices"]):
+        new_item = ItemFactory(order=order)
+
+    return (
+        "This is the root for the Orders API. The REST API provides the functionality to create, update, delete and update orders and order items",
+        status.HTTP_200_OK,
+    )
