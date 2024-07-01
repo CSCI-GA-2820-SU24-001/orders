@@ -15,26 +15,31 @@
 ######################################################################
 
 """
-Pet Store Service
+Orders Service
 
 This service implements a REST API that allows you to Create, Read, Update
-and Delete Pets from the inventory of pets in the PetShop
+and Delete Orders
 """
-
+from datetime import datetime
 from flask import jsonify, request, url_for, abort
 from flask import current_app as app  # Import Flask application
-from service.models import Order, Item
+from service.models import Order, Item, OrderStatus
 from service.common import status  # HTTP Status Codes
+import logging
 
 
 ######################################################################
 # GET INDEX
 ######################################################################
-@app.route("/")
+
+logger = logging.getLogger("flask.app")
+
+
+@app.route("/orders")
 def index():
     """Root URL response"""
     return (
-        "Reminder: return some useful information in json format about the service here",
+        "This is the root for the Orders API which provides CRUD operations for orders",
         status.HTTP_200_OK,
     )
 
@@ -44,3 +49,48 @@ def index():
 ######################################################################
 
 # Todo: Place your REST API code here ...
+
+@app.route("/orders", methods=['GET', 'POST', 'PUT', 'DELETE'])
+def order():
+
+    if request.method == 'POST':
+        """ This method creates an order item given the items and their quantities """
+        """ Assume POST request json data to have keys:
+            item_ids: int arr,
+            quantities: int arr,
+            customer ID: int
+        """
+    data = request.json
+    logger.info("*************DATA*********************")
+    logger.info(request.json)
+
+    order_obj = Order()
+
+    order_obj.customer_id = int(data["customer_id"])
+    order_obj.shipping_address = data["shipping_address"]
+    order_obj.status = OrderStatus.CREATED
+    order_obj.created_at = datetime.now()
+
+    order_obj.create()
+
+    logger.info("ORDER ID: ")
+    order_obj.deserialize(request.get_json())
+
+    for item in data["items"]:
+        item["order_id"] = order_obj.id
+
+    # Create a message to return
+    for item in data["items"]:
+        new_item = Item(order=order_obj)
+        new_item.deserialize(item)
+        # new_item.order_id = item["order_id"]
+        # new_item.product_id = item["id"]
+        # new_item.quantity = item["quantity"]
+        # new_item.product_description = item["product_description"]
+        # new_item.price = item["price"]
+        # new_item.order_id = order_obj.id
+        # new_item.update()
+    logger.info("**************ACTUAL DATA************")
+    logger.info(order_obj.items)
+    message = order_obj.serialize()
+    return (jsonify(message), status.HTTP_201_CREATED)

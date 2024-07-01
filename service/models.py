@@ -233,6 +233,16 @@ class Order(db.Model):
         try:
             self.customer_id = data["customer_id"]
             self.shipping_address = data["shipping_address"]
+
+            # Explicitly convert 'created at' to datetime due to varying input type
+
+            if isinstance(data["created_at"], datetime.datetime):
+                data["created_at"] = datetime.datetime.timestamp(data["created_at"])
+            data["created_at"] = str(data["created_at"])
+            data["created_at"] = datetime.datetime.fromtimestamp(
+                int(float(data["created_at"]))
+            )
+
             if isinstance(data["created_at"], datetime.datetime):
                 self.created_at = data["created_at"]
             else:
