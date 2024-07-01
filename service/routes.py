@@ -94,3 +94,24 @@ def order():
     logger.info(order_obj.items)
     message = order_obj.serialize()
     return (jsonify(message), status.HTTP_201_CREATED)
+
+######################################################################
+#  LIST ALL ORDERS
+######################################################################
+
+
+@app.route("/orders/customer/<int:customer_id>", methods=["GET"])
+def list_orders(customer_id):
+    """Returns all of the orders"""
+    logger.info("Retrieving orders for customer id: %s", customer_id)
+
+    customer_exists = Order.query.filter_by(customer_id=str(customer_id)).first() is not None
+    # Check if can't find customer
+    if not customer_exists:
+        abort(status.HTTP_404_NOT_FOUND, description="Customer not found")
+
+    orders = Order.query.filter_by(customer_id=str(customer_id)).all()
+    
+    order_list = [order.serialize() for order in orders]
+    return jsonify(order_list), status.HTTP_200_OK
+
