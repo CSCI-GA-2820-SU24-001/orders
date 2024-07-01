@@ -20,22 +20,26 @@ Orders Service
 This service implements a REST API that allows you to Create, Read, Update
 and Delete Orders
 """
-
+from datetime import datetime
 from flask import jsonify, request, url_for, abort
 from flask import current_app as app  # Import Flask application
-from service.models import Order, Item
+from service.models import Order, Item, OrderStatus
 from service.common import status  # HTTP Status Codes
+import logging
+
 
 ######################################################################
 # GET INDEX
 ######################################################################
+
+logger = logging.getLogger("flask.app")
 
 
 @app.route("/orders")
 def index():
     """Root URL response"""
     return (
-        "This is the root for the Orders API. The REST API provides the functionality to create, update, delete and update orders and order items",
+        "This is the root for the Orders API which provides CRUD operations for orders",
         status.HTTP_200_OK,
     )
 
@@ -57,23 +61,36 @@ def order():
             customer ID: int
         """
     data = request.json
+    logger.info("*************DATA*********************")
+    logger.info(request.json)
 
-    order = Order()
-    for item, quant in zip(data["item_ids"], data["quantities"], data["prices"]):
-        new_item = Item()
-        new_item.order_id = order.id
-        new_item.product_id = item
-        new_item.quantity = quant
-        order.items.append(new_item)
+    order_obj = Order()
 
-    order.customer_id = data["customer_id"]
+    order_obj.customer_id = int(data["customer_id"])
+    order_obj.shipping_address = data["shipping_address"]
+    order_obj.status = OrderStatus.CREATED
+    order_obj.created_at = datetime.now()
 
-    return (
-        {
-            "message": "Order created successfully",
-            "items": data["item_ids"],
-            "quantities": data["quantities"],
-            "prices": data["prices"]
-        },
-        status.HTTP_201_CREATED,
-    )
+    order_obj.create()
+
+    logger.info("ORDER ID: ")
+    order_obj.deserialize(request.get_json())
+
+    for item in data["items"]:
+        item["order_id"] = order_obj.id
+
+    # Create a message to return
+    for item in data["items"]:
+        new_item = Item(order=order_obj)
+        new_item.deserialize(item)
+        # new_item.order_id = item["order_id"]
+        # new_item.product_id = item["id"]
+        # new_item.quantity = item["quantity"]
+        # new_item.product_description = item["product_description"]
+        # new_item.price = item["price"]
+        # new_item.order_id = order_obj.id
+        # new_item.update()
+    logger.info("**************ACTUAL DATA************")
+    logger.info(order_obj.items)
+    message = order_obj.serialize()
+    return (jsonify(message), status.HTTP_201_CREATED)
