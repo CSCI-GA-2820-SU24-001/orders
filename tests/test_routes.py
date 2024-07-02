@@ -118,3 +118,44 @@ class TestYourResourceService(TestCase):
             request["items"][-1]["product_description"],
             "Item description does not match",
         )
+
+    def test_list_orders(self):
+        """It should list orders"""
+        customer_id = random.randint(0, 10000)
+        order1 = Order(
+            customer_id=customer_id,
+            shipping_address="726 Broadway, NY 10003",
+            created_at=datetime.now(),
+            status="CREATED",
+        )
+        order1.create()
+
+        order2 = Order(
+            customer_id=customer_id,
+            shipping_address="1428 Elm St",
+            created_at=datetime.now(),
+            status="CREATED",
+        )
+        order2.create()
+
+        response = self.client.get(
+            f"{BASE_URL}/customer/{customer_id}", content_type="application/json"
+        )
+        order_list = response.get_json()
+
+        logger.info("***************** RECEIVED DATA *******************")
+        logger.info(order_list)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_customer_not_found(self):
+        """It should check if customer doesn't exist"""
+        non_existent_customer_id = random.randint(10001, 20000)
+        response = self.client.get(
+            f"{BASE_URL}/customer/{non_existent_customer_id}",
+            content_type="application/json",
+        )
+
+        logger.info("***************** RECEIVED DATA *******************")
+        logger.info(response.get_json())
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
