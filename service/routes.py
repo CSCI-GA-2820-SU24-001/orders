@@ -115,3 +115,20 @@ def list_orders(customer_id):
     order_list = [order.serialize() for order in orders]
     return jsonify(order_list), status.HTTP_200_OK
 
+
+@app.route("/orders/<int:order_id>", methods=["GET"])
+def view_order(order_id: int):
+    """Returns the details of a specific order
+
+    Args:
+        order_id (int): ID of the order
+    """
+    curr_order = Order.query.filter_by(id=int(order_id)).first()
+    if curr_order is None:
+        abort(status.HTTP_404_NOT_FOUND, description="Order not found")
+    logger.info("Returning order details:")
+    logger.info("**********ORDER DETAILS***********")
+    logger.info(jsonify(curr_order.serialize()))
+    return jsonify(curr_order.serialize()), status.HTTP_200_OK
+
+
