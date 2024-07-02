@@ -131,4 +131,7 @@ def view_order(order_id: int):
     logger.info(jsonify(curr_order.serialize()))
     return jsonify(curr_order.serialize()), status.HTTP_200_OK
 
+######################################################################
+#  UPDATE AN ORDER
+######################################################################
 
