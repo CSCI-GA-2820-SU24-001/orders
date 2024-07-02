@@ -108,7 +108,7 @@ def list_orders(customer_id):
     customer_exists = Order.query.filter_by(customer_id=str(customer_id)).first() is not None
     # Check if can't find customer
     if not customer_exists:
-        abort(status.HTTP_404_NOT_FOUND, description="Customer not found")
+        abort(status.HTTP_404_NOT_FOUND)
 
     orders = Order.query.filter_by(customer_id=str(customer_id)).all()
     
@@ -137,32 +137,25 @@ def view_order(order_id: int):
 
 @app.route("/orders/<int:order_id>", methods=['PUT'])
 def update_order(order_id):
-    """Update an existing order"""
+    """Update the order"""
     logger.info(f"Updating order with ID: {order_id}")
     
     data = request.json
     curr_order = Order.query.filter_by(id=order_id).first()
     
     if curr_order is None:
-        abort(status.HTTP_404_NOT_FOUND, description="Order not found")
+        abort(status.HTTP_404_NOT_FOUND)
+    
+    # Check if the order is in a status that allows updates
+    if curr_order.status != OrderStatus.CREATED:
+        abort(status.HTTP_400_BAD_REQUEST)
     
     logger.info("*************EXISTING ORDER DATA*********************")
     logger.info(curr_order.serialize())
     
-    if "customer_id" in data:
-        curr_order.customer_id = int(data["customer_id"])
     if "shipping_address" in data:
         curr_order.shipping_address = data["shipping_address"]
-    if "status" in data:
-        curr_order.status = data["status"]
-    
-    if "items" in data:
-        curr_order.items.clear()
-        for item_data in data["items"]:
-            new_item = Item(order=curr_order)
-            new_item.deserialize(item_data)
-            curr_order.items.append(new_item)
-    
+        
     curr_order.updated_at = datetime.now()
     curr_order.update()
     
