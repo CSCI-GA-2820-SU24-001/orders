@@ -126,8 +126,9 @@ def view_order(order_id: int):
     curr_order = Order.query.filter_by(id=int(order_id)).first()
     if curr_order is None:
         abort(status.HTTP_404_NOT_FOUND, description="Order not found")
-    print("**********ORDER DETAILS***********")
-    print(jsonify(curr_order.serialize()))
+    logger.info("Returning order details:")
+    logger.info("**********ORDER DETAILS***********")
+    logger.info(jsonify(curr_order.serialize()))
     return jsonify(curr_order.serialize()), status.HTTP_200_OK
 
 
