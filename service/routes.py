@@ -118,5 +118,3 @@ def list_orders(customer_id):
 ######################################################################
 #  UPDATE AN ORDER
 ######################################################################
-
-@app.route("/orders/customer/<int:customer_id>", methods=["GET"])
