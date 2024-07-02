@@ -26,6 +26,7 @@ from flask import current_app as app  # Import Flask application
 from service.models import Order, Item, OrderStatus
 from service.common import status  # HTTP Status Codes
 import logging
+from .models import db
 
 
 ######################################################################
@@ -33,7 +34,6 @@ import logging
 ######################################################################
 
 logger = logging.getLogger("flask.app")
-
 
 @app.route("/orders")
 def index():
@@ -135,6 +135,7 @@ def view_order(order_id: int):
 #  UPDATE SHIPPING ADDRESS IN ORDER
 ######################################################################
 
+
 @app.route("/orders/<int:order_id>", methods=['PUT'])
 def update_order_addr(order_id):
     """Update the order"""
@@ -228,3 +229,24 @@ def view_item(order_id: int, item_id: int):
     logger.info("**********ITEM DETAILS***********")
     logger.info(jsonify(req_item.serialize()))
     return jsonify(req_item.serialize(), {"args": [item_id, order_id]}), status.HTTP_200_OK
+
+
+@app.route("/orders/<int:order_id>/item/<int:item_id>", methods=["DELETE"])
+def delete_item_from_order(order_id: int, item_id: int):
+    """Delete an item from the order
+
+    Args:
+        order_id (int): ID of the order
+        item_id (int): ID of the item in the order
+
+    """   
+    order_del = Order.query.filter_by(id=int(order_id)).first()
+    if order_del is None:
+        abort(status.HTTP_404_NOT_FOUND, description="Order not found")
+    
+    item_del = Item.query.filter_by(id=int(item_id), order_id=int(order_del.id)).first()
+    if item_del is None:
+        return jsonify({"message": "Item does not exist"}), status.HTTP_204_NO_CONTENT
+    db.session.delete(item_del)
+    db.session.commit()
+    return jsonify({"message": "Item deleted successfully"}), status.HTTP_204_NO_CONTENT
