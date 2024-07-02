@@ -232,3 +232,24 @@ def delete_order(order_id):
     logger.info("Order deleted successfully")
 
     return "", status.HTTP_204_NO_CONTENT
+
+######################################################################
+#  View a single item in an order
+######################################################################
+
+@app.route("/orders/<int:order_id>/item/<int:item_id>", methods=["GET"])
+def view_item(order_id: int, item_id: int):
+    """Returns the details of an item in an order
+
+    Args:
+        order_id (int): ID of the order
+        item_id (int): ID of the item in the order
+
+    """   
+    req_item = Item.query.filter_by(order_id=int(order_id), id=int(item_id)).first()
+    if req_item is None:
+        abort(status.HTTP_404_NOT_FOUND, description="Item not found")
+    logger.info("Returning item details:")
+    logger.info("**********ITEM DETAILS***********")
+    logger.info(jsonify(req_item.serialize()))
+    return jsonify(req_item.serialize(), {"args": [item_id, order_id]}), status.HTTP_200_OK
