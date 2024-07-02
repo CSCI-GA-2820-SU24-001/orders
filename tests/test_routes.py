@@ -192,7 +192,7 @@ class TestYourResourceService(TestCase):
         logger.info(response.get_json())
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_update_order(self):
+    def test_update_order_addr(self):
         """It should update an existing order"""
         customer_id = random.randint(0, 10000)
 
@@ -223,8 +223,8 @@ class TestYourResourceService(TestCase):
             updated_order["shipping_address"], update_data["shipping_address"]
         )
 
-    def test_update_order_not_found(self):
-        """It should check if it can't find order to update"""
+    def test_update_order_addr_not_found(self):
+        """It should check if it can't find order to update address"""
         # use non existent order
         non_existent_order_id = random.randint(10001, 20000)
 
@@ -244,7 +244,7 @@ class TestYourResourceService(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_update_order_in_processing(self):
+    def test_update_order_addr_in_processing(self):
         """It should check if it's in PROCESSING status"""
         customer_id = random.randint(0, 10000)
 
@@ -271,7 +271,7 @@ class TestYourResourceService(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_update_order_in_completed(self):
+    def test_update_order_addr_in_completed(self):
         """It should check if it's in COMPLETED status"""
         customer_id = random.randint(0, 10000)
 
@@ -297,3 +297,118 @@ class TestYourResourceService(TestCase):
         logger.info(response.get_json())
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_order_status(self):
+        """It should update the status of an existing order from CREATED to PROCESSING"""
+        customer_id = random.randint(0, 10000)
+
+        order = Order(
+            customer_id=customer_id,
+            shipping_address="726 Broadway, NY 10003",
+            created_at=datetime.now(),
+            status="CREATED",
+        )
+        order.create()
+
+        # New status data
+        update_data = {"status": "PROCESSING"}
+
+        logger.info("***************** SENT STATUS DATA *******************")
+        logger.info(update_data)
+
+        response = self.client.put(
+            f"{BASE_URL}/{order.id}/status",
+            json=update_data,
+            content_type="application/json",
+        )
+        updated_order = response.get_json()
+
+        logger.info("***************** RECEIVED STATUS DATA *******************")
+        logger.info(updated_order)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(updated_order["status"], update_data["status"])
+
+    def test_update_order_status_skip(self):
+        """It should not allow updating the status from CREATED to COMPLETED"""
+        customer_id = random.randint(0, 10000)
+
+        order = Order(
+            customer_id=customer_id,
+            shipping_address="726 Broadway, NY 10003",
+            created_at=datetime.now(),
+            status="CREATED",
+        )
+        order.create()
+
+        # Invalid status transition data
+        update_data = {"status": "COMPLETED"}
+
+        logger.info("***************** SENT INVALID STATUS DATA *******************")
+        logger.info(update_data)
+
+        response = self.client.put(
+            f"{BASE_URL}/{order.id}/status",
+            json=update_data,
+            content_type="application/json",
+        )
+
+        logger.info("***************** RECEIVED RESPONSE *******************")
+        logger.info(response.status_code)
+        logger.info(response.get_json())
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_order_status_non_existent(self):
+        """It should not allow updating to a non-existent status"""
+        customer_id = random.randint(0, 10000)
+
+        order = Order(
+            customer_id=customer_id,
+            shipping_address="726 Broadway, NY 10003",
+            created_at=datetime.now(),
+            status="CREATED",
+        )
+        order.create()
+
+        update_data = {"status": "INVALID_STATUS"}
+
+        logger.info(
+            "***************** SENT NON-EXISTENT STATUS DATA *******************"
+        )
+        logger.info(update_data)
+
+        response = self.client.put(
+            f"{BASE_URL}/{order.id}/status",
+            json=update_data,
+            content_type="application/json",
+        )
+
+        logger.info("***************** RECEIVED RESPONSE *******************")
+        logger.info(response.status_code)
+        logger.info(response.get_json())
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_order_status_not_found(self):
+        """It should check if it can't find order to update status"""
+        non_existent_order_id = random.randint(10001, 20000)
+
+        update_data = {"status": "PROCESSING"}
+
+        logger.info(
+            "***************** SENT STATUS DATA FOR NON-EXISTENT ORDER *******************"
+        )
+        logger.info(update_data)
+
+        response = self.client.put(
+            f"{BASE_URL}/{non_existent_order_id}/status",
+            json=update_data,
+            content_type="application/json",
+        )
+
+        logger.info("***************** RECEIVED RESPONSE *******************")
+        logger.info(response.status_code)
+        logger.info(response.get_json())
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
