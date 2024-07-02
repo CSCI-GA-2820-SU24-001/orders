@@ -14,7 +14,6 @@ from service.models import db, Order, Item
 from .factories import ItemFactory
 
 logger = logging.getLogger("flask.app")
-logging.getLogger().setLevel(logging.INFO)
 
 
 DATABASE_URI = os.getenv(

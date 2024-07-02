@@ -33,7 +33,6 @@ import logging
 ######################################################################
 
 logger = logging.getLogger("flask.app")
-logging.getLogger().setLevel(logging.INFO)
 
 
 @app.route("/orders")
