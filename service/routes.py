@@ -135,3 +135,39 @@ def view_order(order_id: int):
 #  UPDATE AN ORDER
 ######################################################################
 
+@app.route("/orders/<int:order_id>", methods=['PUT'])
+def update_order(order_id):
+    """Update an existing order"""
+    logger.info(f"Updating order with ID: {order_id}")
+    
+    data = request.json
+    curr_order = Order.query.filter_by(id=order_id).first()
+    
+    if curr_order is None:
+        abort(status.HTTP_404_NOT_FOUND, description="Order not found")
+    
+    logger.info("*************EXISTING ORDER DATA*********************")
+    logger.info(curr_order.serialize())
+    
+    if "customer_id" in data:
+        curr_order.customer_id = int(data["customer_id"])
+    if "shipping_address" in data:
+        curr_order.shipping_address = data["shipping_address"]
+    if "status" in data:
+        curr_order.status = data["status"]
+    
+    if "items" in data:
+        curr_order.items.clear()
+        for item_data in data["items"]:
+            new_item = Item(order=curr_order)
+            new_item.deserialize(item_data)
+            curr_order.items.append(new_item)
+    
+    curr_order.updated_at = datetime.now()
+    curr_order.update()
+    
+    logger.info("**************UPDATED ORDER DATA************")
+    logger.info(curr_order.serialize())
+    
+    message = curr_order.serialize()
+    return jsonify(message), status.HTTP_200_OK
