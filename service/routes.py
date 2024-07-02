@@ -207,3 +207,28 @@ def update_order_status(order_id):
     message = curr_order.serialize()
     return jsonify(message), status.HTTP_200_OK
 
+######################################################################
+#  DELETE ORDER
+######################################################################
+
+@app.route("/orders/<int:order_id>", methods=['DELETE'])
+def delete_order(order_id):
+    """Delete an order"""
+    logger.info(f"Deleting order with ID: {order_id}")
+
+    curr_order = Order.query.filter_by(id=order_id).first()
+
+    if curr_order is None:
+        abort(status.HTTP_404_NOT_FOUND, f"Order {order_id} not found")
+
+    if curr_order.status != OrderStatus.CREATED:
+        abort(status.HTTP_400_BAD_REQUEST, f"Order {order_id} cannot be deleted in its current status")
+
+    logger.info("*************ORDER TO DELETE*********************")
+    logger.info(curr_order.serialize())
+
+    curr_order.delete()
+
+    logger.info("Order deleted successfully")
+
+    return "", status.HTTP_204_NO_CONTENT
