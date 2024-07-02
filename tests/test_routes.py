@@ -159,3 +159,35 @@ class TestYourResourceService(TestCase):
         logger.info(response.get_json())
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_view_order(self):
+        """It should view an order"""
+        customer_id = random.randint(0, 10000)
+        order1 = Order(
+            customer_id=customer_id,
+            shipping_address="726 Broadway, NY 10003",
+            created_at=datetime.now(),
+            status="CREATED",
+        )
+        order1.create()
+
+        response = self.client.get(
+            f"{BASE_URL}/{order1.id}", content_type="application/json"
+        )
+        order_view = response.get_json()
+
+        logger.info("***************** RECEIVED DATA *******************")
+        logger.info(order_view)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_order_not_found(self):
+        """It should check if order does not exist"""
+        non_existent_order_id = random.randint(10001, 20000)
+        response = self.client.get(
+            f"{BASE_URL}/{non_existent_order_id}",
+            content_type="application/json",
+        )
+
+        logger.info("***************** RECEIVED DATA *******************")
+        logger.info(response.get_json())
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
