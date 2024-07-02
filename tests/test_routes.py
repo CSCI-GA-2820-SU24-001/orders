@@ -10,9 +10,11 @@ from unittest import TestCase
 from wsgi import app
 
 from service.common import status
-from service.models import db, Order
+from service.models import db, Order, Item
+from .factories import ItemFactory
 
 logger = logging.getLogger("flask.app")
+logging.getLogger().setLevel(logging.INFO)
 
 
 DATABASE_URI = os.getenv(
@@ -185,6 +187,43 @@ class TestYourResourceService(TestCase):
         non_existent_order_id = random.randint(10001, 20000)
         response = self.client.get(
             f"{BASE_URL}/{non_existent_order_id}",
+            content_type="application/json",
+        )
+
+        logger.info("***************** RECEIVED DATA *******************")
+        logger.info(response.get_json())
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_view_item(self):
+        """It should view an item in an order"""
+        customer_id = random.randint(0, 10000)
+        order1 = Order(
+            customer_id=customer_id,
+            shipping_address="726 Broadway, NY 10003",
+            created_at=datetime.now(),
+            status="CREATED",
+        )
+        order1.create()
+        item1 = ItemFactory(order=order1)
+        item1.create()
+        response = self.client.get(
+            f"{BASE_URL}/{order1.id}/item/{item1.id}",
+            content_type="application/json",
+        )
+        item_view = response.get_json()
+
+        logger.info("***************** RECEIVED DATA *******************")
+        logger.info(item_view)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_item_not_found(self):
+        """It should check if order does not exist"""
+        non_existent_order_id = random.randint(10001, 20000)
+        non_existent_item_id = random.randint(10001, 20000)
+
+        response = self.client.get(
+            f"{BASE_URL}/{non_existent_order_id}item/{non_existent_item_id}",
             content_type="application/json",
         )
 
