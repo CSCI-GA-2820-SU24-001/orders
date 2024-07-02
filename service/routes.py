@@ -115,6 +115,3 @@ def list_orders(customer_id):
     order_list = [order.serialize() for order in orders]
     return jsonify(order_list), status.HTTP_200_OK
 
-######################################################################
-#  UPDATE AN ORDER
-######################################################################
