@@ -309,12 +309,12 @@ class TestYourResourceService(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_update_order_status(self):
-        """It should update the status of an existing order from CREATED to PROCESSING"""
+        """It should update the order status"""
         customer_id = random.randint(0, 10000)
 
         order = Order(
             customer_id=customer_id,
-            shipping_address="726 Broadway, NY 10003",
+            shipping_address="1428 Elm St",
             created_at=datetime.now(),
             status="CREATED",
         )
@@ -345,7 +345,7 @@ class TestYourResourceService(TestCase):
 
         order = Order(
             customer_id=customer_id,
-            shipping_address="726 Broadway, NY 10003",
+            shipping_address="1428 Elm St",
             created_at=datetime.now(),
             status="CREATED",
         )
@@ -375,13 +375,13 @@ class TestYourResourceService(TestCase):
 
         order = Order(
             customer_id=customer_id,
-            shipping_address="726 Broadway, NY 10003",
+            shipping_address="1428 Elm St",
             created_at=datetime.now(),
             status="CREATED",
         )
         order.create()
 
-        update_data = {"status": "INVALID_STATUS"}
+        update_data = {"status": "HAPPY"}
 
         logger.info(
             "***************** SENT NON-EXISTENT STATUS DATA *******************"
@@ -422,6 +422,77 @@ class TestYourResourceService(TestCase):
         logger.info(response.get_json())
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_order(self):
+        """It should delete an existing order"""
+        customer_id = random.randint(0, 10000)
+        order = Order(
+            customer_id=customer_id,
+            shipping_address="1428 Elm St",
+            created_at=datetime.now(),
+            status="CREATED",
+        )
+        order.create()
+
+        response = self.client.delete(
+            f"{BASE_URL}/{order.id}", content_type="application/json"
+        )
+
+        logger.info("***************** DELETE RESPONSE *******************")
+        logger.info(response.data)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+
+    def test_delete_non_existent_order(self):
+        """It should check if it's deleting a non-existent order"""
+        non_existent_order_id = random.randint(10001, 20000)
+        response = self.client.delete(
+            f"{BASE_URL}/{non_existent_order_id}",
+            content_type="application/json",
+        )
+
+        logger.info("***************** DELETE RESPONSE *******************")
+        logger.info(response.get_json())
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_order_in_processing(self):
+        """It should not delete an order that is in PROCESSING status"""
+        customer_id = random.randint(0, 10000)
+        order = Order(
+            customer_id=customer_id,
+            shipping_address="1428 Elm St",
+            created_at=datetime.now(),
+            status="PROCESSING",
+        )
+        order.create()
+
+        response = self.client.delete(
+            f"{BASE_URL}/{order.id}", content_type="application/json"
+        )
+
+        logger.info("***************** DELETE RESPONSE *******************")
+        logger.info(response.get_json())
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_delete_order_in_completed(self):
+        """It should not delete an order that is in COMPLETED status"""
+        customer_id = random.randint(0, 10000)
+        order = Order(
+            customer_id=customer_id,
+            shipping_address="1428 Elm St",
+            created_at=datetime.now(),
+            status="COMPLETED",
+        )
+        order.create()
+
+        response = self.client.delete(
+            f"{BASE_URL}/{order.id}", content_type="application/json"
+        )
+
+        logger.info("***************** DELETE RESPONSE *******************")
+        logger.info(response.get_json())
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_view_item(self):
         """It should view an item in an order"""
