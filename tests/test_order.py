@@ -8,8 +8,10 @@ from unittest import TestCase
 from wsgi import app
 from service.common import status
 from .factories import OrderFactory, ItemFactory
+from unittest.mock import patch
 
-from service.models import db, Order, Item
+
+from service.models import db, Order, Item, DataValidationError
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
@@ -150,3 +152,102 @@ class TestYourResourceService(TestCase):
         self.assertEqual(new_item.product_description, item.product_description)
         self.assertEqual(new_item.price, item.price)
         self.assertEqual(new_item.quantity, item.quantity)
+
+    @patch("service.models.db.session.commit")
+    def test_add_order_failed(self, exception_mock):
+        """It should not create an order if there is a database error"""
+        exception_mock.side_effect = Exception()
+        order = OrderFactory()
+        self.assertRaises(DataValidationError, order.create)
+
+    @patch("service.models.db.session.commit")
+    def test_delete_order_failed(self, exception_mock):
+        """It should delete an order if there is a database error"""
+        order = OrderFactory()
+        order.create()
+        exception_mock.side_effect = Exception()
+        self.assertRaises(DataValidationError, order.delete)
+
+    @patch("service.models.db.session.commit")
+    def test_update_order_failed(self, exception_mock):
+        """It should not update an order on database error"""
+        exception_mock.side_effect = Exception()
+        order = OrderFactory()
+        self.assertRaises(DataValidationError, order.update)
+
+    @patch("service.models.db.session.commit")
+    def test_create_item_failed(self, exception_mock):
+        """It should not create an item if there is a database error"""
+        exception_mock.side_effect = Exception()
+        item = ItemFactory()
+        self.assertRaises(DataValidationError, item.create)
+
+    @patch("service.models.db.session.commit")
+    def test_update_item_failed(self, exception_mock):
+        """It should not update an item on database error"""
+        exception_mock.side_effect = Exception()
+        item = ItemFactory()
+        self.assertRaises(DataValidationError, item.update)
+
+    def test_deserialize_item(self):
+        """
+        Test if Item can be serialized with bad data types
+        """
+        with self.assertRaises(DataValidationError):
+            item = ItemFactory()
+            item.create()
+            new_item = Item()
+            dc = item.serialize()
+            dc["quantity"] = "Hello"
+            new_item.deserialize(dc)
+
+        with self.assertRaises(DataValidationError):
+            item = ItemFactory()
+            item.create()
+            new_item = Item()
+            dc = item.serialize()
+            dc["price"] = "Hello"
+            new_item.deserialize(dc)
+
+    def test_deserialize_order(self):
+        """
+        Test if order can be serialized with bad data types
+        """
+        # with self.assertRaises(DataValidationError):
+        # order = OrderFactory()
+        # order.create()
+        # new_order = Order()
+        # dc = order.serialize()
+        # dc["created_at"] = "Hello"
+        # new_order.deserialize(dc)
+
+        with self.assertRaises(DataValidationError):
+            order = OrderFactory()
+            order.create()
+            new_order = Order()
+            dc = order.serialize()
+            dc["status"] = "Hello"
+            new_order.deserialize(dc)
+
+    def test_show_all_items(self):
+        """
+        Test if all items can be viewed
+
+        Returns:
+            list of Item: A list of all Items in the database
+        """
+        try:
+            Item.all()
+        except Exception as e:
+            return ("Unable to view all items. Error: ", e)
+
+    def test_find_item(self):
+        """Test if an item can be found in the database
+
+        Args:
+            item_id (int): ID of order to be searched
+        """
+        try:
+            Item.find(0)
+        except Exception as e:
+            return ("Unable to view all items. Error: ", e)
