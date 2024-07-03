@@ -646,6 +646,25 @@ class TestYourResourceService(TestCase):
         self.assertEqual(float(new_item["price"]), float(item1.price))
         self.assertEqual(int(new_item["quantity"]), item1.quantity)
 
+    def test_add_item_sad_path_invalid_json(self):
+        """Test adding a new item with invalid JSON data."""
+        customer_id = random.randint(0, 10000)
+        order1 = Order(
+            customer_id=customer_id,
+            shipping_address="726 Broadway, NY 10003",
+            created_at=datetime.now(),
+            status="CREATED",
+        )
+        order1.create()
+
+        # Perform POST request with invalid JSON data
+        response = self.client.post(
+            f"{BASE_URL}/{order1.id}/items",
+            data="Invalid JSON data",
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_add_item_sad_path_missing_fields(self):
         """Test adding a new item with missing required fields."""
         customer_id = random.randint(0, 10000)
