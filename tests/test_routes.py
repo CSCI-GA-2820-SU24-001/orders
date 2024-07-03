@@ -441,7 +441,6 @@ class TestYourResourceService(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-
     def test_delete_non_existent_order(self):
         """It should check if it's deleting a non-existent order"""
         non_existent_order_id = random.randint(10001, 20000)
@@ -571,3 +570,144 @@ class TestYourResourceService(TestCase):
             content_type="application/json",
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_item(self):
+        """It should update the item in order"""
+        customer_id = random.randint(0, 10000)
+
+        order = Order(
+            customer_id=customer_id,
+            shipping_address="1428 Elm St",
+            created_at=datetime.now(),
+            status="CREATED",
+        )
+        order.create()
+
+        item = Item(
+            order_id=order.id,
+            product_id=1,
+            quantity=2,
+            price=23.4,
+            product_description="Apple",
+        )
+        item.create()
+
+        # update the quantities and total price
+        update_data = {
+            "quantity": 5,
+            "price": 30.0,
+        }
+
+        logger.info("***************** SENT ITEM DATA *******************")
+        logger.info(update_data)
+
+        response = self.client.put(
+            f"{BASE_URL}/{order.id}/item/{item.id}",
+            json=update_data,
+            content_type="application/json",
+        )
+
+        updated_item = response.get_json()
+
+        logger.info("***************** RECEIVED ITEM DATA *******************")
+        logger.info(updated_item)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(updated_item["quantity"], update_data["quantity"])
+        self.assertEqual(updated_item["price"], update_data["price"])
+
+    def test_update_item_order_not_found(self):
+        """It should check if it can't find order"""
+        non_existent_order_id = random.randint(10001, 20000)
+        item_id = random.randint(1, 100)
+
+        update_data = {
+            "product_id": 2,
+            "quantity": 5,
+            "price": 30.0,
+        }
+
+        response = self.client.put(
+            f"{BASE_URL}/{non_existent_order_id}/item/{item_id}",
+            json=update_data,
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertIn(
+            f"Order ID {non_existent_order_id} not found",
+            response.get_json()["message"],
+        )
+
+    def test_update_item_not_found(self):
+        """It should check if it can't find item"""
+        customer_id = random.randint(0, 10000)
+
+        order = Order(
+            customer_id=customer_id,
+            shipping_address="1428 Elm St",
+            created_at=datetime.now(),
+            status="CREATED",
+        )
+        order.create()
+
+        # Create non exist item id
+        non_existent_item_id = random.randint(10001, 20000)
+
+        update_data = {
+            "product_id": 2,
+            "quantity": 5,
+            "price": 30.0,
+        }
+
+        response = self.client.put(
+            f"{BASE_URL}/{order.id}/item/{non_existent_item_id}",
+            json=update_data,
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertIn(
+            f"Item ID {non_existent_item_id} not found in Order ID {order.id}",
+            response.get_json()["message"],
+        )
+
+    def test_update_item_not_created(self):
+        """It should check if the order status is not CREATED"""
+        customer_id = random.randint(0, 10000)
+
+        order = Order(
+            customer_id=customer_id,
+            shipping_address="1428 Elm St",
+            created_at=datetime.now(),
+            # non CREATED
+            status="PROCESSING",
+        )
+        order.create()
+
+        item = Item(
+            order_id=order.id,
+            product_id=1,
+            quantity=2,
+            price=23.4,
+            product_description="Apple",
+        )
+        item.create()
+
+        update_data = {
+            "product_id": 2,
+            "quantity": 5,
+            "price": 30.0,
+        }
+
+        response = self.client.put(
+            f"{BASE_URL}/{order.id}/item/{item.id}",
+            json=update_data,
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn(
+            f"Order ID {order.id} cannot be updated in its current status",
+            response.get_json()["message"],
+        )
