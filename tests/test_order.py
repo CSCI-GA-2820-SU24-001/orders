@@ -56,28 +56,33 @@ class TestYourResourceService(TestCase):
     ######################################################################
 
     def test_add_order_item(self):
-        """It should Create an order with an item and add it to the database"""
+        """It should create an Order with an Item and add it to the database"""
+        # Ensure the database is initially empty
         orders = Order.all()
         self.assertEqual(orders, [])
+
+        # Create an Order and an Item
         order = OrderFactory()
         item = ItemFactory(order=order)
         order.items.append(item)
         order.create()
-        # Assert that it was assigned an id and shows up in the database
+
+        # Assert that the order was assigned an id and shows up in the database
         self.assertIsNotNone(order.id)
         orders = Order.all()
         self.assertEqual(len(orders), 1)
-
         new_order = Order.find(order.id)
-        self.assertEqual(new_order.items[0].id, item.id)
+        self.assertEqual(len(new_order.items), 1)
+        self.assertEqual(new_order.items[0].product_id, item.product_id)
 
+        # Add another Item to the Order
         item2 = ItemFactory(order=order)
         order.items.append(item2)
         order.update()
 
         new_order = Order.find(order.id)
         self.assertEqual(len(new_order.items), 2)
-        self.assertEqual(new_order.items[1].id, item2.id)
+        self.assertEqual(new_order.items[1].product_id, item2.product_id)
 
     def test_update_order_item(self):
         """It should Update an orders item"""

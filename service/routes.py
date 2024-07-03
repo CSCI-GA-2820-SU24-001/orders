@@ -260,8 +260,8 @@ def view_item(order_id: int, item_id: int):
     logger.info("Returning item details:")
     logger.info("**********ITEM DETAILS***********")
     logger.info(jsonify(req_item.serialize()))
-    return jsonify(req_item.serialize(), {"args": [item_id, order_id]}), status.HTTP_200_OK
-
+    
+    return jsonify(req_item.serialize()), status.HTTP_200_OK
 
 ######################################################################
 #  UPDATE AN ITEM IN THE ORDER
@@ -325,3 +325,46 @@ def delete_item_from_order(order_id: int, item_id: int):
     db.session.delete(item_del)
     db.session.commit()
     return jsonify({"message": "Item deleted successfully"}), status.HTTP_204_NO_CONTENT
+
+
+######################################################################
+#  Add/Create a new item 
+######################################################################
+@app.route("/orders/<int:order_id>/items", methods=["POST"])
+def add_item_to_order(order_id):
+    """
+    Add a new item to an order.
+    """
+    app.logger.info("Request to add an item to order %s", order_id)
+
+    order = Order.query.get(order_id)
+    if not order:
+        abort(status.HTTP_404_NOT_FOUND, f"Order with id '{order_id}' was not found.")
+
+    item_data = request.get_json()
+    if not item_data:
+        abort(status.HTTP_400_BAD_REQUEST, "No data provided")
+
+    try:
+        new_item = Item(
+            order_id=order.id,
+            product_id=item_data['product_id'],
+            product_description=item_data['product_description'],
+            quantity=item_data['quantity'],
+            price=item_data['price']
+        )
+        db.session.add(new_item)
+        db.session.commit()
+    except KeyError as e:
+        abort(status.HTTP_400_BAD_REQUEST, f"Missing field: {str(e)}")
+    except Exception as e:
+        db.session.rollback()
+        abort(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Error creating item: {str(e)}")
+
+    response_data = new_item.serialize()
+    
+    location_url = url_for('view_item', order_id=order.id, item_id=new_item.id, _external=True)
+    
+    return jsonify(response_data), status.HTTP_201_CREATED, {'Location': location_url}
+
+

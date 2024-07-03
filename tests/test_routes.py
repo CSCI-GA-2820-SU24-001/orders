@@ -12,7 +12,7 @@ from wsgi import app
 from service.common import status
 from service.models import db, Order, Item
 
-from .factories import ItemFactory
+from .factories import ItemFactory, OrderFactory
 
 logger = logging.getLogger("flask.app")
 
@@ -55,6 +55,43 @@ class TestYourResourceService(TestCase):
     def tearDown(self):
         """This runs after each test"""
         db.session.remove()
+
+    ############################################################
+    # Utility function to bulk create items and orders
+    ############################################################
+    def _create_orders(self, count: int = 1) -> list:
+        """Factory method to create Orders in bulk"""
+        orders = []
+        for _ in range(count):
+            test_order = OrderFactory()
+            response = self.client.post(BASE_URL, json=test_order.serialize())
+            self.assertEqual(
+                response.status_code,
+                status.HTTP_201_CREATED,
+                "Could not create test Order",
+            )
+            new_orders = response.get_json()
+            test_order.id = new_orders["id"]
+            orders.append(test_order)
+        return orders
+
+    def _create_items(self, order, count: int = 1) -> list:
+        """Factory method to create items in bulk for a given order"""
+        items = []
+        for _ in range(count):
+            test_item = ItemFactory(order=order)
+            response = self.client.post(
+                f"{BASE_URL}/{order.id}/items", json=test_item.serialize()
+            )
+            self.assertEqual(
+                response.status_code,
+                status.HTTP_201_CREATED,
+                "Could not create test item",
+            )
+            new_item = response.get_json()
+            test_item.id = new_item["id"]
+            items.append(test_item)
+        return items
 
     ######################################################################
     #  P L A C E   T E S T   C A S E S   H E R E
@@ -526,7 +563,7 @@ class TestYourResourceService(TestCase):
         non_existent_item_id = random.randint(10001, 20000)
 
         response = self.client.get(
-            f"{BASE_URL}/{non_existent_order_id}item/{non_existent_item_id}",
+            f"{BASE_URL}/{non_existent_order_id}/item/{non_existent_item_id}",
             content_type="application/json",
         )
 
@@ -567,6 +604,105 @@ class TestYourResourceService(TestCase):
 
         response = self.client.delete(
             f"{BASE_URL}/{order1.id}/item/12434353",
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_add_item(self):
+        """It should Create a new Item"""
+        customer_id = random.randint(0, 10000)
+        order1 = Order(
+            customer_id=customer_id,
+            shipping_address="726 Broadway, NY 10003",
+            created_at=datetime.now(),
+            status="CREATED",
+        )
+        order1.create()
+
+        item1 = ItemFactory(order=order1)
+        item1.create()
+
+        # Perform POST request to create a new item
+        response = self.client.post(
+            f"{BASE_URL}/{order1.id}/items",
+            json=item1.serialize(),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Check if 'Location' header is present
+        location = response.headers.get("Location")
+        self.assertIsNotNone(location)
+
+        # Perform GET request to retrieve the newly created item
+        response = self.client.get(location)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Validate the retrieved item matches the created item
+        new_item = response.get_json()
+        self.assertIsInstance(new_item, dict)
+        self.assertEqual(str(new_item["product_id"]), str(item1.product_id))
+        self.assertEqual(new_item["product_description"], item1.product_description)
+        self.assertEqual(float(new_item["price"]), float(item1.price))
+        self.assertEqual(int(new_item["quantity"]), item1.quantity)
+
+    def test_add_item_sad_path_invalid_json(self):
+        """Test adding a new item with invalid JSON data."""
+        customer_id = random.randint(0, 10000)
+        order1 = Order(
+            customer_id=customer_id,
+            shipping_address="726 Broadway, NY 10003",
+            created_at=datetime.now(),
+            status="CREATED",
+        )
+        order1.create()
+
+        # Perform POST request with invalid JSON data
+        response = self.client.post(
+            f"{BASE_URL}/{order1.id}/items",
+            data="Invalid JSON data",
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_add_item_sad_path_missing_fields(self):
+        """Test adding a new item with missing required fields."""
+        customer_id = random.randint(0, 10000)
+        order1 = Order(
+            customer_id=customer_id,
+            shipping_address="726 Broadway, NY 10003",
+            created_at=datetime.now(),
+            status="CREATED",
+        )
+        order1.create()
+
+        # Create an item with missing required fields
+        incomplete_item = {
+            "product_id": 12345,
+            # Missing 'quantity', 'product_description', 'price'
+        }
+
+        # Perform POST request with incomplete item data
+        response = self.client.post(
+            f"{BASE_URL}/{order1.id}/items",
+            json=incomplete_item,
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_add_item_sad_path_order_not_found(self):
+        """Test adding a new item to a non-existent order."""
+        non_existent_order_id = 99999
+
+        # Perform POST request to add item to a non-existent order
+        response = self.client.post(
+            f"{BASE_URL}/{non_existent_order_id}/items",
+            json={
+                "product_id": 12345,
+                "quantity": 1,
+                "product_description": "Test Product",
+                "price": 10.99,
+            },
             content_type="application/json",
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
