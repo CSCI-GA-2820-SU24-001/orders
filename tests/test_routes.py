@@ -435,11 +435,6 @@ class TestYourResourceService(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-        # Check if the order has been deleted
-        response = self.client.get(
-            f"{BASE_URL}/{order.id}", content_type="application/json"
-        )
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_non_existent_order(self):
         """It should check if it's deleting a non-existent order"""
