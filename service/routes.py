@@ -215,6 +215,31 @@ def update_order_status(order_id):
     message = curr_order.serialize()
     return jsonify(message), status.HTTP_200_OK
 
+######################################################################
+#  DELETE ORDER
+######################################################################
+
+@app.route("/orders/<int:order_id>", methods=['DELETE'])
+def delete_order(order_id):
+    """Delete an order"""
+    logger.info(f"Deleting order with ID: {order_id}")
+
+    curr_order = Order.query.filter_by(id=order_id).first()
+
+    if curr_order is None:
+        abort(status.HTTP_404_NOT_FOUND, f"Order {order_id} not found")
+
+    if curr_order.status != OrderStatus.CREATED:
+        abort(status.HTTP_400_BAD_REQUEST, f"Order {order_id} cannot be deleted in its current status")
+
+    logger.info("*************ORDER TO DELETE*********************")
+    logger.info(curr_order.serialize())
+
+    curr_order.delete()
+
+    logger.info("Order deleted successfully")
+
+    return "", status.HTTP_204_NO_CONTENT
 
 ######################################################################
 #  View a single item in an order
@@ -238,6 +263,49 @@ def view_item(order_id: int, item_id: int):
     
     return jsonify(req_item.serialize()), status.HTTP_200_OK
 
+######################################################################
+#  UPDATE AN ITEM IN THE ORDER
+######################################################################
+
+
+@app.route("/orders/<int:order_id>/item/<int:item_id>", methods=['PUT'])
+def update_item(order_id: int, item_id: int):
+    """Update an item in the order"""
+    logger.info(f"Updating item with ID: {item_id} in order with ID: {order_id}")
+
+    data = request.json
+    order = Order.query.filter_by(id=order_id).first()
+    
+    if order is None:
+        abort(status.HTTP_404_NOT_FOUND, f"Order ID {order_id} not found")
+    
+    if order.status != OrderStatus.CREATED:
+        abort(status.HTTP_400_BAD_REQUEST, f"Order ID {order_id} cannot be updated in its current status")
+    
+    item = Item.query.filter_by(order_id=order_id, id=item_id).first()
+    
+    if item is None:
+        abort(status.HTTP_404_NOT_FOUND, f"Item ID {item_id} not found in Order ID {order_id}")
+    
+    logger.info("*************EXISTING ITEM DATA*********************")
+    logger.info(item.serialize())
+
+    if "quantity" in data:
+        item.quantity = data["quantity"]
+    if "price" in data:
+        item.price = data["price"]
+    
+    item.updated_at = datetime.now()
+    item.update()
+    
+    logger.info("**************UPDATED ITEM DATA************")
+    logger.info(item.serialize())
+    
+    message = item.serialize()
+    return jsonify(message), status.HTTP_200_OK
+
+
+
 @app.route("/orders/<int:order_id>/item/<int:item_id>", methods=["DELETE"])
 def delete_item_from_order(order_id: int, item_id: int):
     """Delete an item from the order
@@ -253,7 +321,7 @@ def delete_item_from_order(order_id: int, item_id: int):
     
     item_del = Item.query.filter_by(id=int(item_id), order_id=int(order_del.id)).first()
     if item_del is None:
-        return jsonify({"message": "Item does not exist"}), status.HTTP_204_NO_CONTENT
+        return jsonify({"message": "Item does not exist"}), status.HTTP_404_NOT_FOUND
     db.session.delete(item_del)
     db.session.commit()
     return jsonify({"message": "Item deleted successfully"}), status.HTTP_204_NO_CONTENT
