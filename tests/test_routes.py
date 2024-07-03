@@ -459,3 +459,27 @@ class TestYourResourceService(TestCase):
         logger.info("***************** RECEIVED DATA *******************")
         logger.info(response.get_json())
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_item(self):
+        """It should delete an item in an order"""
+        customer_id = random.randint(0, 10000)
+        order1 = Order(
+            customer_id=customer_id,
+            shipping_address="726 Broadway, NY 10003",
+            created_at=datetime.now(),
+            status="CREATED",
+        )
+        order1.create()
+        item1 = ItemFactory(order=order1)
+        item1.create()
+        response = self.client.delete(
+            f"{BASE_URL}/{order1.id}/item/{item1.id}",
+            content_type="application/json",
+        )
+        # print(response.data)
+        # item_view = response.get_json()
+
+        # logger.info("***************** RECEIVED DATA *******************")
+        # logger.info(item_view)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
