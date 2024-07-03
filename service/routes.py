@@ -35,7 +35,14 @@ from .models import db
 
 logger = logging.getLogger("flask.app")
 
-@app.route("/orders")
+
+@app.route("/health")
+def health_check():
+    """Let them know our heart is still beating"""
+    return jsonify(status=200, message="Healthy"), status.HTTP_200_OK
+
+
+@app.route("/")
 def index():
     """Root URL response"""
     return (
