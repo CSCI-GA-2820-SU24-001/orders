@@ -646,6 +646,48 @@ class TestYourResourceService(TestCase):
         self.assertEqual(float(new_item["price"]), float(item1.price))
         self.assertEqual(int(new_item["quantity"]), item1.quantity)
 
+    def test_add_item_sad_path_missing_fields(self):
+        """Test adding a new item with missing required fields."""
+        customer_id = random.randint(0, 10000)
+        order1 = Order(
+            customer_id=customer_id,
+            shipping_address="726 Broadway, NY 10003",
+            created_at=datetime.now(),
+            status="CREATED",
+        )
+        order1.create()
+
+        # Create an item with missing required fields
+        incomplete_item = {
+            "product_id": 12345,
+            # Missing 'quantity', 'product_description', 'price'
+        }
+
+        # Perform POST request with incomplete item data
+        response = self.client.post(
+            f"{BASE_URL}/{order1.id}/items",
+            json=incomplete_item,
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_add_item_sad_path_order_not_found(self):
+        """Test adding a new item to a non-existent order."""
+        non_existent_order_id = 99999
+
+        # Perform POST request to add item to a non-existent order
+        response = self.client.post(
+            f"{BASE_URL}/{non_existent_order_id}/items",
+            json={
+                "product_id": 12345,
+                "quantity": 1,
+                "product_description": "Test Product",
+                "price": 10.99,
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_update_item(self):
         """It should update the item in order"""
         customer_id = random.randint(0, 10000)
