@@ -253,7 +253,7 @@ def delete_item_from_order(order_id: int, item_id: int):
     
     item_del = Item.query.filter_by(id=int(item_id), order_id=int(order_del.id)).first()
     if item_del is None:
-        return jsonify({"message": "Item does not exist"}), status.HTTP_204_NO_CONTENT
+        return jsonify({"message": "Item does not exist"}), status.HTTP_404_NOT_FOUND
     db.session.delete(item_del)
     db.session.commit()
     return jsonify({"message": "Item deleted successfully"}), status.HTTP_204_NO_CONTENT

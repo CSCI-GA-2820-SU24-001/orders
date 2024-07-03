@@ -65,7 +65,6 @@ class TestYourResourceService(TestCase):
         resp = self.client.get("/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
-    
     def test_health(self):
         """It should be healthy"""
         response = self.client.get("/health")
@@ -73,7 +72,6 @@ class TestYourResourceService(TestCase):
         data = response.get_json()
         self.assertEqual(data["status"], 200)
         self.assertEqual(data["message"], "Healthy")
-        
 
     def test_create(self):
         """
@@ -446,6 +444,12 @@ class TestYourResourceService(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+        response = self.client.get(
+            f"{BASE_URL}/{order1.id}/item/502212",
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_item_not_found(self):
         """It should check if order does not exist"""
         non_existent_order_id = random.randint(10001, 20000)
@@ -483,3 +487,16 @@ class TestYourResourceService(TestCase):
         # logger.info(item_view)
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        response = self.client.delete(
+            f"{BASE_URL}/70210/item/{item1.id}",
+            content_type="application/json",
+        )
+        print("RESPONSE: ", response)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        response = self.client.delete(
+            f"{BASE_URL}/{order1.id}/item/12434353",
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

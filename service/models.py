@@ -9,6 +9,7 @@ from flask_sqlalchemy import SQLAlchemy
 import datetime
 from enum import Enum
 
+
 logger = logging.getLogger("flask.app")
 
 # Create the SQLAlchemy object to be initialized later in init_db()
@@ -115,8 +116,8 @@ class Item(db.Model):
                     "Invalid type for float [price]: " + data["price"]
                 ) from e
 
-        except AttributeError as error:
-            raise DataValidationError("Invalid attribute: " + error.args[0]) from error
+        # except AttributeError as error:
+        #     raise DataValidationError("Invalid attribute: " + error.args[0]) from error
         except KeyError as error:
             raise DataValidationError(
                 "Invalid Item: missing " + error.args[0]
@@ -264,8 +265,8 @@ class Order(db.Model):
                 item.deserialize(item_data)
                 self.items.append(item)
 
-        except AttributeError as error:
-            raise DataValidationError("Invalid attribute: " + error.args[0]) from error
+        # except AttributeError as error:
+        #     raise DataValidationError("Invalid attribute: " + error.args[0]) from error
         except KeyError as error:
             raise DataValidationError(
                 "Invalid Order: missing " + error.args[0]
