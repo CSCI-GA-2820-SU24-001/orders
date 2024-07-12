@@ -8,6 +8,7 @@ from datetime import datetime
 import logging
 from unittest import TestCase
 from wsgi import app
+from urllib.parse import quote_plus
 
 from service.common import status
 from service.models import db, Order, Item
@@ -110,6 +111,52 @@ class TestYourResourceService(TestCase):
         self.assertEqual(data["status"], 200)
         self.assertEqual(data["message"], "Healthy")
 
+    # ----------------------------------------------------------
+    # TEST LIST AND QUERY
+    # ----------------------------------------------------------
+    def test_get_order_list(self):
+        """It should Get a list of Orders"""
+        self._create_orders(5)
+        response = self.client.get(BASE_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), 5)
+
+    def test_query_by_customer_id(self):
+        """It should Query Orders by customer id"""
+        orders = self._create_orders(5)
+        test_customer_id = orders[0].customer_id
+        cust_count = len(
+            [order for order in orders if order.customer_id == test_customer_id]
+        )
+        response = self.client.get(
+            BASE_URL, query_string=f"customer_id={quote_plus(str(test_customer_id))}"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), cust_count)
+        # check the data just to be sure
+        for order in data:
+            self.assertEqual(order["customer_id"], str(test_customer_id))
+
+    def test_query_by_status(self):
+        """It should Query Orders by status"""
+        orders = self._create_orders(5)
+        test_status = orders[0].status
+        status_count = len([order for order in orders if order.status == test_status])
+        response = self.client.get(
+            BASE_URL, query_string=f"status_name={test_status.name}"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), status_count)
+        # check the data just to be sure
+        for order in data:
+            self.assertEqual(order["status"], test_status.name)
+
+    # ----------------------------------------------------------
+    # TEST CRUD
+    # ----------------------------------------------------------
     def test_create(self):
         """
         It should call the method to create an order and return a 201 status code
@@ -118,7 +165,7 @@ class TestYourResourceService(TestCase):
             "items": [],
             "customer_id": random.randint(0, 10000),
             "shipping_address": "726 Broadway, NY 10003",
-            "created_at": int(datetime.timestamp(datetime.now())),
+            "created_at": "Mon, 22 Jan 2024 17:00:52 GMT",
             "status": "CREATED",
         }
 
