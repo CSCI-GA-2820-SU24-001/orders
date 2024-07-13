@@ -5,13 +5,17 @@ TestYourResourceModel API Service Test Suite
 import os
 import logging
 from unittest import TestCase
-from wsgi import app
-from service.common import status
-from .factories import OrderFactory, ItemFactory
 from unittest.mock import patch
-
-
+from sqlalchemy.exc import (
+    IntegrityError,
+    OperationalError,
+    ProgrammingError,
+    DataError,
+    DatabaseError,
+)
+from wsgi import app
 from service.models import db, Order, Item, DataValidationError
+from .factories import OrderFactory, ItemFactory
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
@@ -242,8 +246,15 @@ class TestYourResourceService(TestCase):
             list of Item: A list of all Items in the database
         """
         try:
-            Item.all()
-        except Exception as e:
+            items = Item.all()
+            return items
+        except (
+            IntegrityError,
+            OperationalError,
+            ProgrammingError,
+            DataError,
+            DatabaseError,
+        ) as e:
             return ("Unable to view all items. Error: ", e)
 
     def test_find_item(self):
@@ -253,6 +264,12 @@ class TestYourResourceService(TestCase):
             item_id (int): ID of order to be searched
         """
         try:
-            Item.find(0)
-        except Exception as e:
+            return Item.find(0)
+        except (
+            IntegrityError,
+            OperationalError,
+            ProgrammingError,
+            DataError,
+            DatabaseError,
+        ) as e:
             return ("Unable to view all items. Error: ", e)

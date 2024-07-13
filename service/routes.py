@@ -21,11 +21,11 @@ This service implements a REST API that allows you to Create, Read, Update
 and Delete Orders
 """
 from datetime import datetime
+import logging
 from flask import jsonify, request, url_for, abort
 from flask import current_app as app  # Import Flask application
 from service.models import Order, Item, OrderStatus
 from service.common import status  # HTTP Status Codes
-import logging
 from .models import db
 
 
@@ -34,6 +34,10 @@ from .models import db
 ######################################################################
 
 logger = logging.getLogger("flask.app")
+
+
+class DataValidationError(Exception):
+    """Used for an data validation errors when deserializing"""
 
 
 @app.route("/health")
@@ -85,11 +89,11 @@ def list_all_orders():
 @app.route("/orders", methods=["POST"])
 def create_order():
     """This method creates an order item given the items and their quantities"""
-    """ Assume POST request json data to have keys:
-        item_ids: int arr,
-        quantities: int arr,
-        customer ID: int
-        """
+    # This method creates an order item given the items and their quantities"""
+    # Assume POST request json data to have keys:
+    #    item_ids: int arr,
+    #    quantities: int arr,
+    #    customer ID: int
     data = request.json
     logger.info("*************DATA*********************")
     logger.info(request.json)
@@ -205,7 +209,7 @@ def update_order(order_id):
 @app.route("/orders/<int:order_id>", methods=["DELETE"])
 def delete_order(order_id):
     """Delete an order"""
-    logger.info(f"Deleting order with ID: {order_id}")
+    logger.info("Deleting order with ID: %s", order_id)
 
     curr_order = Order.query.filter_by(id=order_id).first()
 
@@ -257,7 +261,7 @@ def view_item(order_id: int, item_id: int):
 @app.route("/orders/<int:order_id>/item/<int:item_id>", methods=["PUT"])
 def update_item(order_id: int, item_id: int):
     """Update an item in the order"""
-    logger.info(f"Updating item with ID: {item_id} in order with ID: {order_id}")
+    logger.info("Updating item with ID: %s in order with ID: %s", item_id, order_id)
 
     data = request.json
     order = Order.query.filter_by(id=order_id).first()
@@ -348,7 +352,7 @@ def add_item_to_order(order_id):
         db.session.commit()
     except KeyError as e:
         abort(status.HTTP_400_BAD_REQUEST, f"Missing field: {str(e)}")
-    except Exception as e:
+    except DataValidationError as e:
         db.session.rollback()
         abort(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Error creating item: {str(e)}")
 
@@ -371,11 +375,11 @@ def list_items_in_order(order_id: int):
     """Returns the list of items in an order"""
     order = Order.query.filter_by(id=order_id).first()
     if order is None:
-        abort(status.HTTP_404_NOT_FOUND, f"Order not found")
+        abort(status.HTTP_404_NOT_FOUND, "Order not found")
 
     items = Item.query.filter_by(order_id=order_id).all()
     items_list = [item.serialize() for item in items]
 
-    logger.info(f"Returning {len(items_list)} items for order ID {order_id}")
+    logger.info("Returning %d items for order ID %d", len(items_list), order_id)
 
     return jsonify(items_list), status.HTTP_200_OK

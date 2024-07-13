@@ -2,11 +2,10 @@
 Test Factory to make fake objects for testing
 """
 
-import factory
+from datetime import datetime, timezone
 from factory import Factory, SubFactory, Sequence, Faker, post_generation
 from factory.fuzzy import FuzzyChoice, FuzzyDateTime
 from service.models import Order, Item, OrderStatus
-from datetime import datetime, timezone
 
 
 class OrderFactory(Factory):
