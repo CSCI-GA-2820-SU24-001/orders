@@ -67,29 +67,36 @@ def order():
             quantities: int arr,
             customer ID: int
         """
-    data = request.json
+    data = request.get_json()
     logger.info("*************DATA*********************")
     logger.info(request.json)
 
     order_obj = Order()
 
+    if "customer_id" not in data.keys():
+        return (jsonify("Request missing parameter 'customer_id'"), status.HTTP_400_BAD_REQUEST)
+    if "shipping_address" not in data.keys():
+        return (jsonify("Request missing parameter 'shipping_address'"), status.HTTP_400_BAD_REQUEST)
+
     order_obj.customer_id = int(data["customer_id"])
     order_obj.shipping_address = data["shipping_address"]
     order_obj.status = OrderStatus.CREATED
     order_obj.created_at = datetime.now()
+    data["status"] = "CREATED"
+    data["created_at"] = datetime.now()
 
     order_obj.create()
 
     logger.info("ORDER ID: ")
-    order_obj.deserialize(request.get_json())
+    order_obj.deserialize(data)
 
     for item in data["items"]:
         item["order_id"] = order_obj.id
 
     # Create a message to return
-    for item in data["items"]:
-        new_item = Item(order=order_obj)
-        new_item.deserialize(item)
+    # for item in data["items"]:
+    #     new_item = Item(order=order_obj)
+    #     new_item.deserialize(item)
         # new_item.order_id = item["order_id"]
         # new_item.product_id = item["id"]
         # new_item.quantity = item["quantity"]
