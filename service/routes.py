@@ -55,17 +55,40 @@ def index():
 #  R E S T   A P I   E N D P O I N T S
 ######################################################################
 
-# Todo: Place your REST API code here ...
 
-@app.route("/orders", methods=['GET', 'POST', 'PUT', 'DELETE'])
-def order():
+@app.route("/orders", methods=["GET"])
+def list_all_orders():
+    """Returns all of the Orders"""
+    app.logger.info("Request for order list")
 
-    if request.method == 'POST':
-        """ This method creates an order item given the items and their quantities """
-        """ Assume POST request json data to have keys:
-            item_ids: int arr,
-            quantities: int arr,
-            customer ID: int
+    orders = []
+
+    # Parse any arguments from the query string
+    customer_id = request.args.get("customer_id")
+    status_name = request.args.get("status_name")
+
+    if customer_id:
+        app.logger.info("Find by customer_id: %s", customer_id)
+        orders = Order.find_by_customer_id(customer_id)
+    elif status_name:
+        app.logger.info("Find by status: %s", status_name)
+        orders = Order.find_by_status(status_name)
+    else:
+        app.logger.info("Find all")
+        orders = Order.all()
+
+    results = [order.serialize() for order in orders]
+    app.logger.info("Returning %d orders", len(results))
+    return jsonify(results), status.HTTP_200_OK
+
+
+@app.route("/orders", methods=["POST"])
+def create_order():
+    """This method creates an order item given the items and their quantities"""
+    """ Assume POST request json data to have keys:
+        item_ids: int arr,
+        quantities: int arr,
+        customer ID: int
         """
     data = request.get_json()
     logger.info("*************DATA*********************")
@@ -109,26 +132,6 @@ def order():
     message = order_obj.serialize()
     return (jsonify(message), status.HTTP_201_CREATED)
 
-######################################################################
-#  LIST ALL ORDERS
-######################################################################
-
-
-@app.route("/orders/customer/<int:customer_id>", methods=["GET"])
-def list_orders(customer_id):
-    """Returns all of the orders"""
-    logger.info("Retrieving orders for customer id: %s", customer_id)
-
-    customer_exists = Order.query.filter_by(customer_id=str(customer_id)).first() is not None
-    # Check if can't find customer
-    if not customer_exists:
-        abort(status.HTTP_404_NOT_FOUND, f"Customer ID {customer_id} not found")
-
-    orders = Order.query.filter_by(customer_id=str(customer_id)).all()
-    
-    order_list = [order.serialize() for order in orders]
-    return jsonify(order_list), status.HTTP_200_OK
-
 
 @app.route("/orders/<int:order_id>", methods=["GET"])
 def view_order(order_id: int):
@@ -145,99 +148,79 @@ def view_order(order_id: int):
     logger.info(jsonify(curr_order.serialize()))
     return jsonify(curr_order.serialize()), status.HTTP_200_OK
 
+
 ######################################################################
-#  UPDATE SHIPPING ADDRESS IN ORDER
+#  UPDATE IN ORDER
 ######################################################################
 
 
-@app.route("/orders/<int:order_id>", methods=['PUT'])
-def update_order_addr(order_id):
+@app.route("/orders/<int:order_id>", methods=["PUT"])
+def update_order(order_id):
     """Update the order"""
-    logger.info(f"Updating order with ID: {order_id}")
-    
     data = request.json
     curr_order = Order.query.filter_by(id=order_id).first()
-    
-    if curr_order is None:
+
+    if not curr_order:
         abort(status.HTTP_404_NOT_FOUND, f"Order ID {order_id} not found")
-    
+
     if curr_order.status != OrderStatus.CREATED:
-        abort(status.HTTP_400_BAD_REQUEST, f"Order ID {order_id} cannot be updated in its current status")
-    
+        abort(
+            status.HTTP_400_BAD_REQUEST,
+            f"Order ID {order_id} cannot be updated in its current status",
+        )
+
     logger.info("*************EXISTING ORDER DATA*********************")
     logger.info(curr_order.serialize())
-    
+
     if "shipping_address" in data:
         curr_order.shipping_address = data["shipping_address"]
-        
+
+    if "status" in data:
+        new_status = data.get("status")
+        if new_status not in [status.name for status in OrderStatus]:
+            abort(status.HTTP_400_BAD_REQUEST, "Invalid status provided")
+
+        new_status_enum = OrderStatus[new_status]
+        valid_transitions = {
+            OrderStatus.CREATED: [OrderStatus.PROCESSING],
+            OrderStatus.PROCESSING: [OrderStatus.COMPLETED],
+            OrderStatus.COMPLETED: [],
+        }
+
+        if new_status_enum not in valid_transitions[curr_order.status]:
+            abort(
+                status.HTTP_400_BAD_REQUEST,
+                f"Order ID {order_id} cannot be updated to {new_status}",
+            )
+
+        curr_order.status = new_status_enum
+
     curr_order.updated_at = datetime.now()
     curr_order.update()
-    
+
     logger.info("**************UPDATED ORDER DATA************")
     logger.info(curr_order.serialize())
-    
-    message = curr_order.serialize()
-    return jsonify(message), status.HTTP_200_OK
 
-######################################################################
-#  UPDATE STATUS IN ORDER
-######################################################################
+    return jsonify(curr_order.serialize()), status.HTTP_200_OK
 
-
-@app.route("/orders/<int:order_id>/status", methods=['PUT'])
-def update_order_status(order_id):
-    """Update the status of an order"""
-    logger.info(f"Updating status of order with ID: {order_id}")
-    
-    data = request.json
-    new_status = data.get("status")
-    
-    if new_status not in [status.name for status in OrderStatus]:
-        abort(status.HTTP_400_BAD_REQUEST, f"INVALID STATUS")
-
-    curr_order = Order.query.filter_by(id=order_id).first()
-    
-    if curr_order is None:
-        abort(status.HTTP_404_NOT_FOUND)
-    
-    current_status = curr_order.status
-    new_status_enum = OrderStatus[new_status]
-    
-    valid_transitions = {
-        OrderStatus.CREATED: [OrderStatus.PROCESSING],
-        OrderStatus.PROCESSING: [OrderStatus.COMPLETED],
-        OrderStatus.COMPLETED: []
-    }
-    
-    if new_status_enum not in valid_transitions[current_status]:
-        abort(status.HTTP_400_BAD_REQUEST, f"Order ID {order_id} cannot be updated")
-    
-    curr_order.status = new_status_enum
-    curr_order.updated_at = datetime.now()
-    curr_order.update()
-    
-    logger.info("**************UPDATED ORDER STATUS************")
-    logger.info(curr_order.serialize())
-    
-    message = curr_order.serialize()
-    return jsonify(message), status.HTTP_200_OK
 
 ######################################################################
 #  DELETE ORDER
 ######################################################################
 
-@app.route("/orders/<int:order_id>", methods=['DELETE'])
+
+@app.route("/orders/<int:order_id>", methods=["DELETE"])
 def delete_order(order_id):
     """Delete an order"""
     logger.info(f"Deleting order with ID: {order_id}")
 
     curr_order = Order.query.filter_by(id=order_id).first()
 
-    if curr_order is None:
-        abort(status.HTTP_404_NOT_FOUND, f"Order {order_id} not found")
-
     if curr_order.status != OrderStatus.CREATED:
-        abort(status.HTTP_400_BAD_REQUEST, f"Order {order_id} cannot be deleted in its current status")
+        abort(
+            status.HTTP_400_BAD_REQUEST,
+            f"Order {order_id} cannot be deleted in its current status",
+        )
 
     logger.info("*************ORDER TO DELETE*********************")
     logger.info(curr_order.serialize())
@@ -248,9 +231,11 @@ def delete_order(order_id):
 
     return "", status.HTTP_204_NO_CONTENT
 
+
 ######################################################################
 #  View a single item in an order
 ######################################################################
+
 
 @app.route("/orders/<int:order_id>/item/<int:item_id>", methods=["GET"])
 def view_item(order_id: int, item_id: int):
@@ -260,40 +245,47 @@ def view_item(order_id: int, item_id: int):
         order_id (int): ID of the order
         item_id (int): ID of the item in the order
 
-    """   
+    """
     req_item = Item.query.filter_by(order_id=int(order_id), id=int(item_id)).first()
     if req_item is None:
         abort(status.HTTP_404_NOT_FOUND, description="Item not found")
     logger.info("Returning item details:")
     logger.info("**********ITEM DETAILS***********")
     logger.info(jsonify(req_item.serialize()))
-    
+
     return jsonify(req_item.serialize()), status.HTTP_200_OK
+
 
 ######################################################################
 #  UPDATE AN ITEM IN THE ORDER
 ######################################################################
 
 
-@app.route("/orders/<int:order_id>/item/<int:item_id>", methods=['PUT'])
+@app.route("/orders/<int:order_id>/item/<int:item_id>", methods=["PUT"])
 def update_item(order_id: int, item_id: int):
     """Update an item in the order"""
     logger.info(f"Updating item with ID: {item_id} in order with ID: {order_id}")
 
     data = request.json
     order = Order.query.filter_by(id=order_id).first()
-    
+
     if order is None:
         abort(status.HTTP_404_NOT_FOUND, f"Order ID {order_id} not found")
-    
+
     if order.status != OrderStatus.CREATED:
-        abort(status.HTTP_400_BAD_REQUEST, f"Order ID {order_id} cannot be updated in its current status")
-    
+        abort(
+            status.HTTP_400_BAD_REQUEST,
+            f"Order ID {order_id} cannot be updated in its current status",
+        )
+
     item = Item.query.filter_by(order_id=order_id, id=item_id).first()
-    
+
     if item is None:
-        abort(status.HTTP_404_NOT_FOUND, f"Item ID {item_id} not found in Order ID {order_id}")
-    
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Item ID {item_id} not found in Order ID {order_id}",
+        )
+
     logger.info("*************EXISTING ITEM DATA*********************")
     logger.info(item.serialize())
 
@@ -301,16 +293,15 @@ def update_item(order_id: int, item_id: int):
         item.quantity = data["quantity"]
     if "price" in data:
         item.price = data["price"]
-    
+
     item.updated_at = datetime.now()
     item.update()
-    
+
     logger.info("**************UPDATED ITEM DATA************")
     logger.info(item.serialize())
-    
+
     message = item.serialize()
     return jsonify(message), status.HTTP_200_OK
-
 
 
 @app.route("/orders/<int:order_id>/item/<int:item_id>", methods=["DELETE"])
@@ -321,11 +312,11 @@ def delete_item_from_order(order_id: int, item_id: int):
         order_id (int): ID of the order
         item_id (int): ID of the item in the order
 
-    """   
+    """
     order_del = Order.query.filter_by(id=int(order_id)).first()
     if order_del is None:
         abort(status.HTTP_404_NOT_FOUND, description="Order not found")
-    
+
     item_del = Item.query.filter_by(id=int(item_id), order_id=int(order_del.id)).first()
     if item_del is None:
         return jsonify({"message": "Item does not exist"}), status.HTTP_404_NOT_FOUND
@@ -335,7 +326,7 @@ def delete_item_from_order(order_id: int, item_id: int):
 
 
 ######################################################################
-#  Add/Create a new item 
+#  Add/Create a new item
 ######################################################################
 @app.route("/orders/<int:order_id>/items", methods=["POST"])
 def add_item_to_order(order_id):
@@ -355,10 +346,10 @@ def add_item_to_order(order_id):
     try:
         new_item = Item(
             order_id=order.id,
-            product_id=item_data['product_id'],
-            product_description=item_data['product_description'],
-            quantity=item_data['quantity'],
-            price=item_data['price']
+            product_id=item_data["product_id"],
+            product_description=item_data["product_description"],
+            quantity=item_data["quantity"],
+            price=item_data["price"],
         )
         db.session.add(new_item)
         db.session.commit()
@@ -369,9 +360,29 @@ def add_item_to_order(order_id):
         abort(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Error creating item: {str(e)}")
 
     response_data = new_item.serialize()
-    
-    location_url = url_for('view_item', order_id=order.id, item_id=new_item.id, _external=True)
-    
-    return jsonify(response_data), status.HTTP_201_CREATED, {'Location': location_url}
+
+    location_url = url_for(
+        "view_item", order_id=order.id, item_id=new_item.id, _external=True
+    )
+
+    return jsonify(response_data), status.HTTP_201_CREATED, {"Location": location_url}
 
 
+######################################################################
+#  LIST ITEMS IN AN ORDER
+######################################################################
+
+
+@app.route("/orders/<int:order_id>/items", methods=["GET"])
+def list_items_in_order(order_id: int):
+    """Returns the list of items in an order"""
+    order = Order.query.filter_by(id=order_id).first()
+    if order is None:
+        abort(status.HTTP_404_NOT_FOUND, f"Order not found")
+
+    items = Item.query.filter_by(order_id=order_id).all()
+    items_list = [item.serialize() for item in items]
+
+    logger.info(f"Returning {len(items_list)} items for order ID {order_id}")
+
+    return jsonify(items_list), status.HTTP_200_OK
