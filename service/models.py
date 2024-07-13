@@ -235,22 +235,18 @@ class Order(db.Model):
             self.customer_id = data["customer_id"]
             self.shipping_address = data["shipping_address"]
 
-            # Explicitly convert 'created at' to datetime due to varying input type
-
-            if isinstance(data["created_at"], datetime.datetime):
-                data["created_at"] = datetime.datetime.timestamp(data["created_at"])
-            data["created_at"] = str(data["created_at"])
-            data["created_at"] = datetime.datetime.fromtimestamp(
-                int(float(data["created_at"]))
-            )
-
-            if isinstance(data["created_at"], datetime.datetime):
+            if isinstance(data["created_at"], str):
+                data["created_at"] = datetime.datetime.strptime(
+                    data["created_at"], "%a, %d %b %Y %H:%M:%S %Z"
+                )
+            elif isinstance(data["created_at"], datetime.datetime):
                 self.created_at = data["created_at"]
             else:
                 raise DataValidationError(
                     "Invalid type for datetime [created_at]: "
                     + datetime.datetime.strftime(data["created_at"], DATE_FORMAT)
                 ) from e
+
             try:
                 status = OrderStatus[data["status"].upper()]
                 self.status = status
@@ -292,3 +288,32 @@ class Order(db.Model):
         """Finds a Order by it's ID"""
         logger.info("Processing lookup for id %s ...", by_id)
         return cls.query.session.get(cls, by_id)
+
+    @classmethod
+    def find_by_customer_id(cls, customer_id: str) -> list:
+        """Returns all Orders owned by a customer
+
+        :param customer_id: the customer id to match against
+        :type customer_id: str
+
+        :return: a collection of Orders
+        :rtype: list
+
+        """
+        logger.info("Processing customer_id query for %s ...", customer_id)
+        return cls.query.filter(cls.customer_id == customer_id)
+
+    @classmethod
+    def find_by_status(cls, status: str) -> list:
+        """Returns all Orders owned by order status
+
+        :param status: the status to match against
+        :type status: str
+
+        :return: a collection of Orders
+        :rtype: list
+
+        """
+        logger.info("Processing status query for %s ...", status)
+        status_enum = OrderStatus[status]
+        return cls.query.filter(cls.status == status_enum)
