@@ -29,6 +29,7 @@ BASE_URL = "/orders"
 #  T E S T   C A S E S
 ######################################################################
 # pylint: disable=too-many-public-methods
+# pylint: disable=duplicate-code
 class TestOrderAPIService(TestCase):
     """REST API Server Tests"""
 

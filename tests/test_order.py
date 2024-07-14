@@ -26,6 +26,7 @@ DATABASE_URI = os.getenv(
 #  T E S T   C A S E S
 ######################################################################
 # pylint: disable=too-many-public-methods
+# pylint: disable=duplicate-code
 class TestYourResourceService(TestCase):
     """REST API Server Tests"""
 
