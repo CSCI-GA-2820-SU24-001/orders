@@ -309,11 +309,11 @@ class Order(db.Model):
 
         :param status: the status to match against
         :type status: str
-
         :return: a collection of Orders
         :rtype: list
 
         """
         logger.info("Processing status query for %s ...", status)
         status_enum = OrderStatus[status]
+        print("RAW", status, "ENUM:", status_enum)
         return cls.query.filter(cls.status == status_enum)
