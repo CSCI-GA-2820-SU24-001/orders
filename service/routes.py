@@ -394,3 +394,44 @@ def list_items_in_order(order_id: int):
     logger.info("Returning %d items for order ID %d", len(items_list), order_id)
 
     return jsonify(items_list), status.HTTP_200_OK
+
+
+######################################################################
+#  CHANGE THE STATUS OF THE ORDER
+######################################################################
+
+
+@app.route("/orders/<int:order_id>/status", methods=["PUT"])
+def change_status(order_id):
+    """Change the status of an order"""
+    data = request.json
+    curr_order = Order.query.filter_by(id=order_id).first()
+
+    if not curr_order:
+        abort(status.HTTP_404_NOT_FOUND, f"Order ID {order_id} not found")
+
+    new_status = data.get("status")
+    if new_status not in [status.name for status in OrderStatus]:
+        abort(status.HTTP_400_BAD_REQUEST, "Invalid status provided")
+
+    new_status_enum = OrderStatus[new_status]
+    valid_transitions = {
+        OrderStatus.CREATED: [OrderStatus.PROCESSING],
+        OrderStatus.PROCESSING: [OrderStatus.COMPLETED],
+        OrderStatus.COMPLETED: [],
+    }
+
+    if new_status_enum not in valid_transitions[curr_order.status]:
+        abort(
+            status.HTTP_400_BAD_REQUEST,
+            f"Order ID {order_id} cannot be updated to {new_status}",
+        )
+
+    curr_order.status = new_status_enum
+    curr_order.updated_at = datetime.now()
+    curr_order.update()
+
+    logger.info("**************UPDATED ORDER STATUS************")
+    logger.info(curr_order.serialize())
+
+    return jsonify(curr_order.serialize()), status.HTTP_200_OK
