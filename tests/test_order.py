@@ -277,7 +277,8 @@ class TestYourResourceService(TestCase):
 
     def test_find_by_status(self):
         """It should Find Orders by Status"""
-        [OrderFactory().create() for _ in range(10)]
+        for _ in range(10):
+            OrderFactory().create()
         orders = Order.all()
         status_filter = orders[0].status
         status_count = len([order for order in orders if order.status == status_filter])
