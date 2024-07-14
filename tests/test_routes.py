@@ -818,6 +818,8 @@ class TestOrderAPIService(TestCase):
             f"Order ID {order.id} cannot be updated in its current status",
             response.get_json()["message"],
         )
+# WRITING TO TEST
+=======
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
