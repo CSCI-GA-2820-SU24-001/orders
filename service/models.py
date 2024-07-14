@@ -315,5 +315,4 @@ class Order(db.Model):
         """
         logger.info("Processing status query for %s ...", status)
         status_enum = OrderStatus[status]
-        print("RAW", status, "ENUM:", status_enum)
         return cls.query.filter(cls.status == status_enum)

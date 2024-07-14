@@ -66,7 +66,6 @@ def list_all_orders():
     app.logger.info("Request for order list")
 
     orders = []
-    print("ALL", [x.status for x in list(Order.all())])
     # Parse any arguments from the query string
     customer_id = request.args.get("customer_id")
     status_name = request.args.get("status_name")
@@ -76,17 +75,13 @@ def list_all_orders():
         orders = Order.find_by_customer_id(customer_id)
     elif status_name:
         app.logger.info("Find by status: %s", status_name)
-        print(f"find by status {status_name}")
         orders = Order.find_by_status(status_name)
     else:
         app.logger.info("Find all")
         orders = Order.all()
 
-    print("RAW LIST", list(orders))
     orders = [order for order in orders]
-    print(f"len={len(orders)}")
     results = [order.serialize() for order in orders]
-    print(f"found {len(results)} orders from query")
     app.logger.info("Returning %d orders", len(results))
     return jsonify(results), status.HTTP_200_OK
 
