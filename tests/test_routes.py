@@ -7,8 +7,8 @@ import random
 from datetime import datetime
 import logging
 from unittest import TestCase
-from wsgi import app
 from urllib.parse import quote_plus
+from wsgi import app
 
 from service.common import status
 from service.models import db, Order, Item
@@ -29,7 +29,8 @@ BASE_URL = "/orders"
 #  T E S T   C A S E S
 ######################################################################
 # pylint: disable=too-many-public-methods
-class TestYourResourceService(TestCase):
+# pylint: disable=duplicate-code
+class TestOrderAPIService(TestCase):
     """REST API Server Tests"""
 
     @classmethod
@@ -823,10 +824,12 @@ class TestYourResourceService(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_unsupported_media_type(self):
+        """Check if post request returns unsupported media type correctly"""
         response = self.client.post("/orders", data="hello", content_type="text/html")
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
     def test_delete_root_not_allowed(self):
+        """Check if root can be deleted"""
         response = self.client.delete("/")
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 

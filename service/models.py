@@ -5,9 +5,9 @@ All of the models are stored in this module
 """
 
 import logging
-from flask_sqlalchemy import SQLAlchemy
 import datetime
 from enum import Enum
+from flask_sqlalchemy import SQLAlchemy
 
 
 logger = logging.getLogger("flask.app")
@@ -245,7 +245,7 @@ class Order(db.Model):
                 raise DataValidationError(
                     "Invalid type for datetime [created_at]: "
                     + datetime.datetime.strftime(data["created_at"], DATE_FORMAT)
-                ) from e
+                )
 
             try:
                 status = OrderStatus[data["status"].upper()]
