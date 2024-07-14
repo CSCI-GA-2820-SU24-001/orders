@@ -309,7 +309,6 @@ class Order(db.Model):
 
         :param status: the status to match against
         :type status: str
-
         :return: a collection of Orders
         :rtype: list
 

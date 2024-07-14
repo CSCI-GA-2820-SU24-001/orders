@@ -274,3 +274,15 @@ class TestYourResourceService(TestCase):
             DatabaseError,
         ) as e:
             return ("Unable to view all items. Error: ", e)
+
+    def test_find_by_status(self):
+        """It should Find Orders by Status"""
+        for _ in range(10):
+            OrderFactory().create()
+        orders = Order.all()
+        status_filter = orders[0].status
+        status_count = len([order for order in orders if order.status == status_filter])
+        found = Order.find_by_status(status_filter.name)
+        self.assertEqual(found.count(), status_count)
+        for order in found:
+            self.assertEqual(order.status, status_filter)

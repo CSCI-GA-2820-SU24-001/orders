@@ -66,7 +66,6 @@ def list_all_orders():
     app.logger.info("Request for order list")
 
     orders = []
-
     # Parse any arguments from the query string
     customer_id = request.args.get("customer_id")
     status_name = request.args.get("status_name")
@@ -101,15 +100,20 @@ def create_order():
     order_obj = Order()
 
     if "customer_id" not in data.keys():
-        return (jsonify("Request missing parameter 'customer_id'"), status.HTTP_400_BAD_REQUEST)
+        return (
+            jsonify("Request missing parameter 'customer_id'"),
+            status.HTTP_400_BAD_REQUEST,
+        )
     if "shipping_address" not in data.keys():
-        return (jsonify("Request missing parameter 'shipping_address'"), status.HTTP_400_BAD_REQUEST)
+        return (
+            jsonify("Request missing parameter 'shipping_address'"),
+            status.HTTP_400_BAD_REQUEST,
+        )
 
     order_obj.customer_id = int(data["customer_id"])
     order_obj.shipping_address = data["shipping_address"]
-    order_obj.status = OrderStatus.CREATED
+    order_obj.status = OrderStatus[data["status"]]
     order_obj.created_at = datetime.now()
-    data["status"] = "CREATED"
     data["created_at"] = datetime.now()
 
     order_obj.create()
@@ -124,13 +128,13 @@ def create_order():
     # for item in data["items"]:
     #     new_item = Item(order=order_obj)
     #     new_item.deserialize(item)
-        # new_item.order_id = item["order_id"]
-        # new_item.product_id = item["id"]
-        # new_item.quantity = item["quantity"]
-        # new_item.product_description = item["product_description"]
-        # new_item.price = item["price"]
-        # new_item.order_id = order_obj.id
-        # new_item.update()
+    # new_item.order_id = item["order_id"]
+    # new_item.product_id = item["id"]
+    # new_item.quantity = item["quantity"]
+    # new_item.product_description = item["product_description"]
+    # new_item.price = item["price"]
+    # new_item.order_id = order_obj.id
+    # new_item.update()
     logger.info("**************ACTUAL DATA************")
     logger.info(order_obj.items)
     message = order_obj.serialize()
