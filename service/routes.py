@@ -80,7 +80,6 @@ def list_all_orders():
         app.logger.info("Find all")
         orders = Order.all()
 
-    orders = [order for order in orders]
     results = [order.serialize() for order in orders]
     app.logger.info("Returning %d orders", len(results))
     return jsonify(results), status.HTTP_200_OK
