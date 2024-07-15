@@ -893,3 +893,108 @@ class TestOrderAPIService(TestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_change_status(self):
+        """It should change the status of an existing order"""
+        customer_id = random.randint(0, 10000)
+
+        order = Order(
+            customer_id=customer_id,
+            shipping_address="1428 Elm St",
+            created_at=datetime.now(),
+            status="CREATED",
+        )
+        order.create()
+
+        # Change the status to PROCESSING
+        update_data_status = {"status": "PROCESSING"}
+        response = self.client.put(
+            f"{BASE_URL}/{order.id}/status",
+            json=update_data_status,
+            content_type="application/json",
+        )
+        updated_order = response.get_json()
+
+        logger.info("***************** RECEIVED STATUS DATA *******************")
+        logger.info(updated_order)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(updated_order["status"], update_data_status["status"])
+
+    def test_change_status_invalid_transition(self):
+        """It should check if the order status transition is invalid"""
+        customer_id = random.randint(0, 10000)
+
+        order = Order(
+            customer_id=customer_id,
+            shipping_address="1428 Elm St",
+            created_at=datetime.now(),
+            status="CREATED",
+        )
+        order.create()
+
+        # Attempt to jump the status to COMPLETED
+        update_data_status = {"status": "COMPLETED"}
+        response = self.client.put(
+            f"{BASE_URL}/{order.id}/status",
+            json=update_data_status,
+            content_type="application/json",
+        )
+
+        logger.info("***************** RECEIVED RESPONSE *******************")
+        logger.info(response.status_code)
+        logger.info(response.get_json())
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_change_status_not_found(self):
+        """It should check if the order to update status is not found"""
+        non_existent_order_id = random.randint(10001, 20000)
+
+        update_data = {"status": "PROCESSING"}
+        logger.info(
+            "***************** SENT STATUS DATA FOR NON-EXISTENT ORDER *******************"
+        )
+        logger.info(update_data)
+
+        response = self.client.put(
+            f"{BASE_URL}/{non_existent_order_id}/status",
+            json=update_data,
+            content_type="application/json",
+        )
+
+        logger.info("***************** RECEIVED RESPONSE *******************")
+        logger.info(response.status_code)
+        logger.info(response.get_json())
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_change_status_non_exist(self):
+        """It should check if the status is not exist"""
+        customer_id = random.randint(0, 10000)
+
+        # Create an order with initial status 'CREATED'
+        order = Order(
+            customer_id=customer_id,
+            shipping_address="1428 Elm St",
+            created_at=datetime.now(),
+            status="CREATED",
+        )
+        order.create()
+
+        # Attempt to change non-existent status
+        update_data = {"status": "ARRIVED"}
+        logger.info("***************** SENT INVALID STATUS DATA *******************")
+        logger.info(update_data)
+
+        response = self.client.put(
+            f"{BASE_URL}/{order.id}/status",
+            json=update_data,
+            content_type="application/json",
+        )
+
+        logger.info("***************** RECEIVED RESPONSE *******************")
+        logger.info(response.status_code)
+        logger.info(response.get_json())
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
