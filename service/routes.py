@@ -343,7 +343,7 @@ def add_item_to_order(order_id):
     """
     app.logger.info("Request to add an item to order %s", order_id)
 
-    order = Order.query.get(order_id)
+    order = db.session.get(Order, order_id)
     if not order:
         abort(status.HTTP_404_NOT_FOUND, f"Order with id '{order_id}' was not found.")
 
@@ -394,3 +394,28 @@ def list_items_in_order(order_id: int):
     logger.info("Returning %d items for order ID %d", len(items_list), order_id)
 
     return jsonify(items_list), status.HTTP_200_OK
+
+
+@app.route("/orders/<int:order_id>/complete", methods=["PUT"])
+def complete_order(order_id):
+    """
+    Complete an existing order
+    """
+    app.logger.info(f"Completing order with ID: {order_id}")
+
+    order = Order.query.filter_by(id=order_id).first()
+
+    if not order:
+        abort(status.HTTP_404_NOT_FOUND, f"Order with ID {order_id} not found")
+
+    if order.status != OrderStatus.PROCESSING:
+        abort(
+            status.HTTP_400_BAD_REQUEST,
+            f"Order with ID {order_id} cannot be completed in its current status",
+        )
+
+    order.complete()
+
+    app.logger.info(f"Order with ID {order_id} completed")
+
+    return jsonify(order.serialize()), status.HTTP_201_CREATED

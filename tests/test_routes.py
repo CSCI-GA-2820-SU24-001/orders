@@ -11,7 +11,7 @@ from urllib.parse import quote_plus
 from wsgi import app
 
 from service.common import status
-from service.models import db, Order, Item
+from service.models import db, Order, Item, OrderStatus
 
 from .factories import ItemFactory, OrderFactory
 
@@ -57,6 +57,30 @@ class TestOrderAPIService(TestCase):
     def tearDown(self):
         """This runs after each test"""
         db.session.remove()
+
+    def test_complete_order(self):
+        """It should complete an order"""
+        order = OrderFactory(status=OrderStatus.PROCESSING)
+        order.create()
+
+        response = self.client.put(f"{BASE_URL}/{order.id}/complete")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        updated_order = response.get_json()
+        self.assertEqual(updated_order["status"], OrderStatus.COMPLETED.name)
+
+    def test_complete_order_not_found(self):
+        """It should return 404 when attempting to complete a non-existent order"""
+        response = self.client.put(f"{BASE_URL}/9999/complete")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_complete_order_invalid_status(self):
+        """It should return 400 when attempting to complete an order that is not in PROCESSING status"""
+        order = OrderFactory(status=OrderStatus.CREATED)
+        order.create()
+
+        response = self.client.put(f"{BASE_URL}/{order.id}/complete")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     ############################################################
     # Utility function to bulk create items and orders
@@ -892,4 +916,45 @@ class TestOrderAPIService(TestCase):
             content_type="application/json",
         )
 
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+# edit
+class TestCompleteOrder(TestOrderAPIService):
+    """Test cases for completing orders"""
+
+    def test_complete_order(self):
+        """It should complete an order"""
+        # Create the order using POST request
+        order = OrderFactory(status=OrderStatus.PROCESSING)
+        response = self.client.post(BASE_URL, json=order.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Get the order id that comes back
+        order.id = response.get_json()["id"]
+
+        # Complete the order
+        response = self.client.put(f"{BASE_URL}/{order.id}/complete")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        updated_order = response.get_json()
+        self.assertEqual(updated_order["status"], OrderStatus.COMPLETED.name)
+
+    def test_complete_order_invalid_status(self):
+        """It should return 400 when attempting to complete an order that is not in PROCESSING status"""
+        # Create the order using POST request
+        order = OrderFactory(status=OrderStatus.CREATED)
+        response = self.client.post(BASE_URL, json=order.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Get the order id that comes back
+        order.id = response.get_json()["id"]
+
+        # Attempt to complete the order
+        response = self.client.put(f"{BASE_URL}/{order.id}/complete")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_complete_order_not_found(self):
+        """It should return 404 when attempting to complete a non-existent order"""
+        response = self.client.put(f"{BASE_URL}/9999/complete")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
