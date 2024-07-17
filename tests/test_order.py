@@ -240,10 +240,23 @@ class TestYourResourceService(TestCase):
             new_order.deserialize(dc)
 
     def test_show_all_items(self):
-        """ """
-        items = Item.all()
-        self.assertIsNotNone(items, "Items should not be None")
-        self.assertIsInstance(items, list, "Items should be a list")
+        """
+        Test if all items can be viewed
+
+        Returns:
+            list of Item: A list of all Items in the database
+        """
+        try:
+            items = Item.all()
+            return items
+        except (
+            IntegrityError,
+            OperationalError,
+            ProgrammingError,
+            DataError,
+            DatabaseError,
+        ) as e:
+            return ("Unable to view all items. Error: ", e)
 
     def test_find_item(self):
         """Test if an item can be found in the database

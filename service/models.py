@@ -158,13 +158,6 @@ class Order(db.Model):
     Class that represents an Order
     """
 
-    def complete(self):
-        """
-        Completes an order by changing its status to 'COMPLETED'.
-        """
-        self.status = OrderStatus.COMPLETED
-        self.update()
-
     ##################################################
     # Table Schema
     ##################################################
