@@ -412,7 +412,7 @@ def add_item_to_order(order_id):
     """
     app.logger.info("Request to add an item to order %s", order_id)
 
-    order = db.session.get(Order, order_id)
+    order = Order.query.get(order_id)
     if not order:
         abort(status.HTTP_404_NOT_FOUND, f"Order with id '{order_id}' was not found.")
 
@@ -465,26 +465,42 @@ def list_items_in_order(order_id: int):
     return jsonify(items_list), status.HTTP_200_OK
 
 
-@app.route("/orders/<int:order_id>/complete", methods=["PUT"])
-def complete_order(order_id):
-    """
-    Complete an existing order
-    """
-    app.logger.info(f"Completing order with ID: {order_id}")
+######################################################################
+#  CHANGE THE STATUS OF THE ORDER
+######################################################################
 
-    order = Order.query.filter_by(id=order_id).first()
 
-    if not order:
-        abort(status.HTTP_404_NOT_FOUND, f"Order with ID {order_id} not found")
+@app.route("/orders/<int:order_id>/status", methods=["PUT"])
+def change_status(order_id):
+    """Change the status of an order"""
+    data = request.json
+    curr_order = Order.query.filter_by(id=order_id).first()
 
-    if order.status != OrderStatus.PROCESSING:
+    if not curr_order:
+        abort(status.HTTP_404_NOT_FOUND, f"Order ID {order_id} not found")
+
+    new_status = data.get("status")
+    if new_status not in [status.name for status in OrderStatus]:
+        abort(status.HTTP_400_BAD_REQUEST, "Invalid status provided")
+
+    new_status_enum = OrderStatus[new_status]
+    valid_transitions = {
+        OrderStatus.CREATED: [OrderStatus.PROCESSING],
+        OrderStatus.PROCESSING: [OrderStatus.COMPLETED],
+        OrderStatus.COMPLETED: [],
+    }
+
+    if new_status_enum not in valid_transitions[curr_order.status]:
         abort(
             status.HTTP_400_BAD_REQUEST,
-            f"Order with ID {order_id} cannot be completed in its current status",
+            f"Order ID {order_id} cannot be updated to {new_status}",
         )
 
-    order.complete()
+    curr_order.status = new_status_enum
+    curr_order.updated_at = datetime.now()
+    curr_order.update()
 
-    app.logger.info(f"Order with ID {order_id} completed")
+    logger.info("**************UPDATED ORDER STATUS************")
+    logger.info(curr_order.serialize())
 
-    return jsonify(order.serialize()), status.HTTP_201_CREATED
+    return jsonify(curr_order.serialize()), status.HTTP_200_OK

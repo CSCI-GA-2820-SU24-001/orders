@@ -11,7 +11,7 @@ from urllib.parse import quote_plus
 from wsgi import app
 
 from service.common import status
-from service.models import db, Order, Item, OrderStatus
+from service.models import db, Order, Item
 
 from .factories import ItemFactory, OrderFactory
 
@@ -57,30 +57,6 @@ class TestOrderAPIService(TestCase):
     def tearDown(self):
         """This runs after each test"""
         db.session.remove()
-
-    def test_complete_order(self):
-        """It should complete an order"""
-        order = OrderFactory(status=OrderStatus.PROCESSING)
-        order.create()
-
-        response = self.client.put(f"{BASE_URL}/{order.id}/complete")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-        updated_order = response.get_json()
-        self.assertEqual(updated_order["status"], OrderStatus.COMPLETED.name)
-
-    def test_complete_order_not_found(self):
-        """It should return 404 when attempting to complete a non-existent order"""
-        response = self.client.put(f"{BASE_URL}/9999/complete")
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_complete_order_invalid_status(self):
-        """It should return 400 when attempting to complete an order that is not in PROCESSING status"""
-        order = OrderFactory(status=OrderStatus.CREATED)
-        order.create()
-
-        response = self.client.put(f"{BASE_URL}/{order.id}/complete")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     ############################################################
     # Utility function to bulk create items and orders
@@ -918,43 +894,107 @@ class TestOrderAPIService(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_change_status(self):
+        """It should change the status of an existing order"""
+        customer_id = random.randint(0, 10000)
 
-# edit
-class TestCompleteOrder(TestOrderAPIService):
-    """Test cases for completing orders"""
+        order = Order(
+            customer_id=customer_id,
+            shipping_address="1428 Elm St",
+            created_at=datetime.now(),
+            status="CREATED",
+        )
+        order.create()
 
-    def test_complete_order(self):
-        """It should complete an order"""
-        # Create the order using POST request
-        order = OrderFactory(status=OrderStatus.PROCESSING)
-        response = self.client.post(BASE_URL, json=order.serialize())
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-        # Get the order id that comes back
-        order.id = response.get_json()["id"]
-
-        # Complete the order
-        response = self.client.put(f"{BASE_URL}/{order.id}/complete")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
+        # Change the status to PROCESSING
+        update_data_status = {"status": "PROCESSING"}
+        response = self.client.put(
+            f"{BASE_URL}/{order.id}/status",
+            json=update_data_status,
+            content_type="application/json",
+        )
         updated_order = response.get_json()
-        self.assertEqual(updated_order["status"], OrderStatus.COMPLETED.name)
 
-    def test_complete_order_invalid_status(self):
-        """It should return 400 when attempting to complete an order that is not in PROCESSING status"""
-        # Create the order using POST request
-        order = OrderFactory(status=OrderStatus.CREATED)
-        response = self.client.post(BASE_URL, json=order.serialize())
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        logger.info("***************** RECEIVED STATUS DATA *******************")
+        logger.info(updated_order)
 
-        # Get the order id that comes back
-        order.id = response.get_json()["id"]
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(updated_order["status"], update_data_status["status"])
 
-        # Attempt to complete the order
-        response = self.client.put(f"{BASE_URL}/{order.id}/complete")
+    def test_change_status_invalid_transition(self):
+        """It should check if the order status transition is invalid"""
+        customer_id = random.randint(0, 10000)
+
+        order = Order(
+            customer_id=customer_id,
+            shipping_address="1428 Elm St",
+            created_at=datetime.now(),
+            status="CREATED",
+        )
+        order.create()
+
+        # Attempt to jump the status to COMPLETED
+        update_data_status = {"status": "COMPLETED"}
+        response = self.client.put(
+            f"{BASE_URL}/{order.id}/status",
+            json=update_data_status,
+            content_type="application/json",
+        )
+
+        logger.info("***************** RECEIVED RESPONSE *******************")
+        logger.info(response.status_code)
+        logger.info(response.get_json())
+
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_complete_order_not_found(self):
-        """It should return 404 when attempting to complete a non-existent order"""
-        response = self.client.put(f"{BASE_URL}/9999/complete")
+    def test_change_status_not_found(self):
+        """It should check if the order to update status is not found"""
+        non_existent_order_id = random.randint(10001, 20000)
+
+        update_data = {"status": "PROCESSING"}
+        logger.info(
+            "***************** SENT STATUS DATA FOR NON-EXISTENT ORDER *******************"
+        )
+        logger.info(update_data)
+
+        response = self.client.put(
+            f"{BASE_URL}/{non_existent_order_id}/status",
+            json=update_data,
+            content_type="application/json",
+        )
+
+        logger.info("***************** RECEIVED RESPONSE *******************")
+        logger.info(response.status_code)
+        logger.info(response.get_json())
+
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_change_status_non_exist(self):
+        """It should check if the status is not exist"""
+        customer_id = random.randint(0, 10000)
+
+        # Create an order with initial status 'CREATED'
+        order = Order(
+            customer_id=customer_id,
+            shipping_address="1428 Elm St",
+            created_at=datetime.now(),
+            status="CREATED",
+        )
+        order.create()
+
+        # Attempt to change non-existent status
+        update_data = {"status": "ARRIVED"}
+        logger.info("***************** SENT INVALID STATUS DATA *******************")
+        logger.info(update_data)
+
+        response = self.client.put(
+            f"{BASE_URL}/{order.id}/status",
+            json=update_data,
+            content_type="application/json",
+        )
+
+        logger.info("***************** RECEIVED RESPONSE *******************")
+        logger.info(response.status_code)
+        logger.info(response.get_json())
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
