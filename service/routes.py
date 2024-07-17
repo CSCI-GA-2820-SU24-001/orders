@@ -457,7 +457,20 @@ def list_items_in_order(order_id: int):
     if order is None:
         abort(status.HTTP_404_NOT_FOUND, "Order not found")
 
-    items = Item.query.filter_by(order_id=order_id).all()
+    # Add query parameters for filtering
+    product_id = request.args.get("product_id")
+    quantity = request.args.get("quantity")
+    price = request.args.get("price")
+
+    query = Item.query.filter_by(order_id=order_id)
+    if product_id:
+        query = query.filter_by(product_id=product_id)
+    if quantity:
+        query = query.filter_by(quantity=int(quantity))
+    if price:
+        query = query.filter_by(price=float(price))
+
+    items = query.all()
     items_list = [item.serialize() for item in items]
 
     logger.info("Returning %d items for order ID %d", len(items_list), order_id)

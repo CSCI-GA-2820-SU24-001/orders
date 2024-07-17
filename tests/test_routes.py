@@ -998,3 +998,136 @@ class TestOrderAPIService(TestCase):
         logger.info(response.get_json())
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_list_items_filter_product_id(self):
+        """It should list items in an order filtered by product_id"""
+        order = Order(
+            customer_id=random.randint(0, 10000),
+            shipping_address="1428 Elm St",
+            created_at=datetime.now(),
+            status="CREATED",
+        )
+        order.create()
+
+        item1 = Item(
+            order_id=order.id,
+            product_id=101,
+            product_description="Product 01",
+            quantity=1,
+            price=10.0,
+        )
+        item1.create()
+
+        item2 = Item(
+            order_id=order.id,
+            product_id=102,
+            product_description="Product 02",
+            quantity=2,
+            price=20.0,
+        )
+        item2.create()
+
+        response = self.client.get(
+            f"{BASE_URL}/{order.id}/items?product_id=101",
+            content_type="application/json",
+        )
+
+        data = response.get_json()
+
+        logger.info("***************** RECEIVED ITEM DATA *******************")
+        logger.info(data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(data), 1)
+        self.assertEqual(int(data[0]["product_id"]), 101)
+        self.assertEqual(data[0]["product_description"], "Product 01")
+        self.assertEqual(data[0]["quantity"], 1)
+        self.assertEqual(data[0]["price"], 10.0)
+
+    def test_list_items_filter_quantity(self):
+        """It should list items in an order filtered by quantity"""
+        order = Order(
+            customer_id=random.randint(0, 10000),
+            shipping_address="1428 Elm St",
+            created_at=datetime.now(),
+            status="CREATED",
+        )
+        order.create()
+
+        item1 = Item(
+            order_id=order.id,
+            product_id=101,
+            product_description="Product 01",
+            quantity=1,
+            price=10.0,
+        )
+        item1.create()
+
+        item2 = Item(
+            order_id=order.id,
+            product_id=102,
+            product_description="Product 02",
+            quantity=2,
+            price=20.0,
+        )
+        item2.create()
+
+        response = self.client.get(
+            f"{BASE_URL}/{order.id}/items?quantity=2",
+            content_type="application/json",
+        )
+
+        data = response.get_json()
+
+        logger.info("***************** RECEIVED ITEM DATA *******************")
+        logger.info(data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]["quantity"], 2)
+        self.assertEqual(data[0]["product_description"], "Product 02")
+        self.assertEqual(data[0]["price"], 20.0)
+
+    def test_list_items_filter_price(self):
+        """It should list items in an order filtered by price"""
+        order = Order(
+            customer_id=random.randint(0, 10000),
+            shipping_address="1428 Elm St",
+            created_at=datetime.now(),
+            status="CREATED",
+        )
+        order.create()
+
+        item1 = Item(
+            order_id=order.id,
+            product_id=101,
+            product_description="Product 01",
+            quantity=1,
+            price=10.0,
+        )
+        item1.create()
+
+        item2 = Item(
+            order_id=order.id,
+            product_id=102,
+            product_description="Product 02",
+            quantity=2,
+            price=20.0,
+        )
+        item2.create()
+
+        response = self.client.get(
+            f"{BASE_URL}/{order.id}/items?price=20.0",
+            content_type="application/json",
+        )
+
+        data = response.get_json()
+
+        logger.info("***************** RECEIVED ITEM DATA *******************")
+        logger.info(data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]["price"], 20.0)
+        self.assertEqual(data[0]["product_description"], "Product 02")
+        self.assertEqual(data[0]["quantity"], 2)
