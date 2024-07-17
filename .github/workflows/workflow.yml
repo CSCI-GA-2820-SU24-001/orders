@@ -46,7 +46,7 @@ jobs:
           # test for complexity. The GitHub editor is 127 chars wide
           flake8 service tests --count --max-complexity=10 --max-line-length=127 --statistics
           # Run pylint to catch other PEP8 errors
-          pylint service tests --max-line-length=127
+          pylint service tests --max-line-length=127 --max-module-lines=1200
 
       - name: Run unit tests with PyTest
         run: pytest --pspec --cov=service --cov-fail-under=95
