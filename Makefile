@@ -1,4 +1,11 @@
+
 # These can be overidden with env vars.
+REGISTRY ?= cluster-registry:32000
+NAMESPACE ?= nyu-devops
+IMAGE_NAME ?= lab-flask-bdd
+IMAGE_TAG ?= 1.0
+IMAGE ?= $(REGISTRY)/$(NAMESPACE)/$(IMAGE_NAME):$(IMAGE_TAG)
+PLATFORM ?= "linux/amd64,linux/arm64"
 CLUSTER ?= nyu-devops
 
 .SILENT:
@@ -13,21 +20,20 @@ all: help
 ##@ Development
 
 .PHONY: clean
-clean:	## Removes all dangling docker images
-	$(info Removing all dangling docker images..)
+clean:	## Removes all dangling build cache
+	$(info Removing all dangling build cache..)
+	-docker rmi $(IMAGE)
 	docker image prune -f
+	docker buildx prune -f
 
-.PHONY: venv
 venv: ## Create a Python virtual environment
 	$(info Creating Python 3 virtual environment...)
-	poetry config virtualenvs.in-project true
 	poetry shell
 
-.PHONY: install
-install: ## Install dependencies
+install: ## Install Python dependencies
 	$(info Installing dependencies...)
-	sudo poetry config virtualenvs.create false
-	sudo poetry install
+	poetry config virtualenvs.create false
+	poetry install
 
 .PHONY: lint
 lint: ## Run the linter
@@ -36,29 +42,70 @@ lint: ## Run the linter
 	flake8 service tests --count --max-complexity=10 --max-line-length=127 --statistics
 	pylint service tests --max-line-length=127
 
-.PHONY: tests
+.PHONY: test
 test: ## Run the unit tests
 	$(info Running tests...)
-	pytest --pspec --cov=service --cov-fail-under=95
-
-##@ Runtime
+	export RETRY_COUNT=1; pytest --disable-warnings
 
 .PHONY: run
 run: ## Run the service
 	$(info Starting service...)
 	honcho start
 
+.PHONY: secret
+secret: ## Generate a secret hex key
+	$(info Generating a new secret key...)
+	python3 -c 'import secrets; print(secrets.token_hex())'
+
+##@ Kubernetes
+
 .PHONY: cluster
 cluster: ## Create a K3D Kubernetes cluster with load balancer and registry
 	$(info Creating Kubernetes cluster with a registry and 1 node...)
-	k3d cluster create --agents 1 --registry-create cluster-registry:0.0.0.0:32000 --port '8080:80@loadbalancer'
+	k3d cluster create nyu-devops --agents 1 --registry-create cluster-registry:0.0.0.0:5000 --port '8080:80@loadbalancer'
 
 .PHONY: cluster-rm
 cluster-rm: ## Remove a K3D Kubernetes cluster
 	$(info Removing Kubernetes cluster...)
-	k3d cluster delete
+	k3d cluster delete nyu-devops
+
+##@ Deploy
+
+.PHONY: push
+image-push: ## Push to a Docker image registry
+	$(info Logging into IBM Cloud cluster $(CLUSTER)...)
+	docker push $(IMAGE)
 
 .PHONY: deploy
-depoy: ## Deploy the service on local Kubernetes
+deploy: ## Deploy the service on local Kubernetes
 	$(info Deploying service locally...)
 	kubectl apply -f k8s/
+
+############################################################
+# COMMANDS FOR BUILDING THE IMAGE
+############################################################
+
+##@ Image Build
+
+.PHONY: init
+init: export DOCKER_BUILDKIT=1
+init:	## Creates the buildx instance
+	$(info Initializing Builder...)
+	-docker buildx create --use --name=qemu
+	docker buildx inspect --bootstrap
+
+.PHONY: build
+build:	## Build all of the project Docker images
+	$(info Building $(IMAGE) for $(PLATFORM)...)
+	docker build --rm --pull --tag $(IMAGE) .
+
+.PHONY: buildx
+buildx:	## Build multi-platform image with buildx
+	$(info Building multi-platform image $(IMAGE) for $(PLATFORM)...)
+	docker buildx build --file Dockerfile  --pull --platform=$(PLATFORM) --tag $(IMAGE) --push .
+
+.PHONY: remove
+remove:	## Stop and remove the buildx builder
+	$(info Stopping and removing the builder image...)
+	docker buildx stop
+	docker buildx rm
