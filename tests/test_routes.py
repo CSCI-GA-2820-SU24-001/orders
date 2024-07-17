@@ -953,6 +953,7 @@ class TestCompleteOrder(TestOrderAPIService):
         # Attempt to complete the order
         response = self.client.put(f"{BASE_URL}/{order.id}/complete")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        ###########################
 
     def test_complete_order_not_found(self):
         """It should return 404 when attempting to complete a non-existent order"""
