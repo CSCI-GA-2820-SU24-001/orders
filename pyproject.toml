@@ -1,32 +1,38 @@
 [tool.poetry]
 name = "service"
 version = "0.1.0"
-description = "NYU DevOps Project"
-authors = ["John Rofrano"]
+description = "NYU DevOps Lab for learning Behavior Driven Development"
+authors = ["John Rofrano <jjr12@nyu.edu>"]
 license = "Apache 2.0"
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-Flask = "^3.0.3"
-flask-sqlalchemy = "3.1.1"
-psycopg = {extras = ["binary"], version = "^3.1.19"}
-retry2 = "^0.9.5"
+Flask = "^3.0.2"
+Flask-SQLAlchemy = "^3.1.1"
+psycopg = { extras = ["binary"], version = "^3.1.17" }
+retry = "^0.9.2"
 python-dotenv = "^1.0.1"
-gunicorn = "^22.0.0"
+gunicorn = "^21.2.0"
 
 [tool.poetry.group.dev.dependencies]
 honcho = "^1.1.0"
-pylint = "^3.2.2"
-flake8 = "^7.0.0"
-black = "^24.4.2"
-pytest = "^8.2.1"
+# Code Quality
+pylint = "^3.0.2"
+flake8 = "^6.1.0"
+black = "^23.10.1"
+# Test-Driven Development
+pytest = "^7.4.3"
 pytest-pspec = "^0.0.4"
-pytest-cov = "^5.0.0"
+pytest-cov = "^4.1.0"
 factory-boy = "^3.3.0"
-coverage = "^7.5.3"
+coverage = "^7.3.2"
 httpie = "^3.2.2"
-poetry-plugin-export = "^1.7.1"
+# Behavior-Driven Development
+behave = "^1.2.6"
+selenium = "4.16.0"  # newer versions do not work
+compare3 = "^1.0.4"
+requests = "^2.31.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -47,10 +53,7 @@ testpaths = ["tests"]
 
 [tool.coverage.run]
 source = ["service"]
-omit = [
-    "venv/*",
-    ".venv/*"
-]
+omit = ["venv/*", ".venv/*"]
 
 [tool.coverage.report]
 show_missing = true
@@ -60,12 +63,12 @@ exclude_lines = [
     "pass",
     "subprocess.CalledProcessError",
     "sys.exit",
-    "if __name__ == .__main__.:"
+    "if __name__ == .__main__.:",
 ]
 ignore_errors = true
 
 [tool.coverage.xml]
-output="./coverage.xml"
+output = "./coverage.xml"
 
 [tool.coverage.html]
 title = "Test Coverage Report"
