@@ -30,7 +30,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.support import expected_conditions
 
-ID_PREFIX = "pet_"
+ID_PREFIX = "orders_"
 
 
 @when('I visit the "Home Page"')
@@ -173,3 +173,19 @@ def step_impl(context, element_name, text_string):
     )
     element.clear()
     element.send_keys(text_string)
+
+
+@when('I close the "{modal_button}" modal')
+def step_impl(context, modal_button):
+    button_id = modal_button.lower() + "-btn"
+    context.driver.find_element(By.ID, button_id).click()
+
+
+@then('I should see "{text_string}" in the "{element_name}" span')
+def step_impl(context, text_string, element_name):
+    context.driver.switch_to.default_content()
+    element_id = ID_PREFIX + element_name.lower().replace(" ", "_")
+    span = context.driver.find_element(By.ID, element_id)
+    text = span.get_attribute("innerHTML")
+
+    assert text == text_string
