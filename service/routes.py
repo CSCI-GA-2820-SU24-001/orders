@@ -49,79 +49,80 @@ def health_check():
 @app.route("/")
 def index():
     """Root URL response"""
-    return (
-        {
-            "general info": "This is the root for the Orders API",
-            "endpoints": [
-                {
-                    "Endpoint": "list_all_orders",
-                    "method": "GET",
-                    "description": "Returns all of the Orders",
-                },
-                {
-                    "Endpoint": "create_order",
-                    "method": "POST",
-                    "description": "Create an order item given the items and their quantities",
-                },
-                {
-                    "Endpoint": "add_item_to_order",
-                    "method": "POST",
-                    "description": "Add an item to order",
-                },
-                {
-                    "Endpoint": "change_status",
-                    "method": "PUT",
-                    "description": "Change the status of an order",
-                },
-                {
-                    "Endpoint": "delete_item_from_order",
-                    "method": "DELETE",
-                    "description": "Delete an item from an order",
-                },
-                {
-                    "Endpoint": "delete_order",
-                    "method": "DELETE",
-                    "description": "Delete an item from an order",
-                },
-                {
-                    "Endpoint": "health_check",
-                    "method": "GET",
-                    "description": "Check health of API",
-                },
-                {
-                    "Endpoint": "index",
-                    "method": "GET",
-                    "description": "Get the root URL and information about the orders API",
-                },
-                {
-                    "Endpoint": "list_items_in_order",
-                    "method": "GET",
-                    "description": "List all items in an order",
-                },
-                {
-                    "Endpoint": "update_item",
-                    "method": "PUT",
-                    "description": "Update an item in an order",
-                },
-                {
-                    "Endpoint": "update_order",
-                    "method": "PUT",
-                    "description": "Update an order",
-                },
-                {
-                    "Endpoint": "view_item",
-                    "method": "GET",
-                    "description": "View an item",
-                },
-                {
-                    "Endpoint": "view_order",
-                    "method": "GET",
-                    "description": "View an order",
-                },
-            ],
-        },
-        status.HTTP_200_OK,
-    )
+    return app.send_static_file("index.html")
+    # return (
+    #     {
+    #         "general info": "This is the root for the Orders API",
+    #         "endpoints": [
+    #             {
+    #                 "Endpoint": "list_all_orders",
+    #                 "method": "GET",
+    #                 "description": "Returns all of the Orders",
+    #             },
+    #             {
+    #                 "Endpoint": "create_order",
+    #                 "method": "POST",
+    #                 "description": "Create an order item given the items and their quantities",
+    #             },
+    #             {
+    #                 "Endpoint": "add_item_to_order",
+    #                 "method": "POST",
+    #                 "description": "Add an item to order",
+    #             },
+    #             {
+    #                 "Endpoint": "change_status",
+    #                 "method": "PUT",
+    #                 "description": "Change the status of an order",
+    #             },
+    #             {
+    #                 "Endpoint": "delete_item_from_order",
+    #                 "method": "DELETE",
+    #                 "description": "Delete an item from an order",
+    #             },
+    #             {
+    #                 "Endpoint": "delete_order",
+    #                 "method": "DELETE",
+    #                 "description": "Delete an item from an order",
+    #             },
+    #             {
+    #                 "Endpoint": "health_check",
+    #                 "method": "GET",
+    #                 "description": "Check health of API",
+    #             },
+    #             {
+    #                 "Endpoint": "index",
+    #                 "method": "GET",
+    #                 "description": "Get the root URL and information about the orders API",
+    #             },
+    #             {
+    #                 "Endpoint": "list_items_in_order",
+    #                 "method": "GET",
+    #                 "description": "List all items in an order",
+    #             },
+    #             {
+    #                 "Endpoint": "update_item",
+    #                 "method": "PUT",
+    #                 "description": "Update an item in an order",
+    #             },
+    #             {
+    #                 "Endpoint": "update_order",
+    #                 "method": "PUT",
+    #                 "description": "Update an order",
+    #             },
+    #             {
+    #                 "Endpoint": "view_item",
+    #                 "method": "GET",
+    #                 "description": "View an item",
+    #             },
+    #             {
+    #                 "Endpoint": "view_order",
+    #                 "method": "GET",
+    #                 "description": "View an order",
+    #             },
+    #         ],
+    #     },
+    #     status.HTTP_200_OK,
+    # )
 
 
 ######################################################################
