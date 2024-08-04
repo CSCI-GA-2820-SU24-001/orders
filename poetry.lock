@@ -1665,3 +1665,14 @@ h11 = ">=0.9.0,<1"
 lock-version = "2.0"
 python-versions = "^3.11"
 content-hash = "d7592607bbf400bbc1be28e04994f35619ca98cd7b0e01d24a05c3af0fe685ac"
+
+[[package]]
+name = "flask-restx"
+version = "1.3.0"
+description = "Fully featured framework for fast, easy and documented API development with Flask"
+optional = false
+python-versions = "*"
+files = [
+    {file = "flask-restx-1.3.0.tar.gz", hash = "sha256:4f3d3fa7b6191fcc715b18c201a12cd875176f92ba4acc61626ccfd571ee1728"},
+    {file = "flask_restx-1.3.0-py2.py3-none-any.whl", hash = "sha256:636c56c3fb3f2c1df979e748019f084a938c4da2035a3e535a4673e4fc177691"},
+]
