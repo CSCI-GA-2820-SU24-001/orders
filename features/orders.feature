@@ -43,6 +43,11 @@ Feature: The Orders service back-end
         And I should see "727 Broadway NY 10003" in the results
         And I should see "728 Broadway NY 10003" in the results
 
+    Scenario: View all Items
+        When I visit the "Home Page"
+        And I press the "viewallitems" button
+        Then I should see "Glucose" in the item results
+        And I should see "Candy" in the item results
 
 # When I copy the "Id" field
 # And I press the "Clear" button
