@@ -26,14 +26,24 @@ Feature: The Orders service back-end
     Scenario: Create an Order
         When I visit the "Home Page"
         And I press the "createOrder" button
-        And I set the "Item IDs" to "1, 2, 3"
+        And I set the "Item IDs" to "1"
         # And I select "False" in the "Available" dropdown
         # And I select "Male" in the "Gender" dropdown
-        And I set the "Item Quantities" to "1, 2, 3"
-        And I set the "Shipping Address" to "New York, NY, USA"
+        And I set the "Item Quantities" to "1"
+        And I set the "Shipping Address" to "NY"
         And I press the "SubmitOrder" button
         And I press the "closeOrderModal" button
         Then I should see "201" in the "Status" span
+
+    Scenario: View all Orders
+        When I visit the "Home Page"
+        And I press the "viewallorder" button
+        Then I should see "725 Broadway NY 10003" in the results
+        And I should see "726 Broadway NY 10003" in the results
+        And I should see "727 Broadway NY 10003" in the results
+        And I should see "728 Broadway NY 10003" in the results
+
+
 # When I copy the "Id" field
 # And I press the "Clear" button
 # Then the "Id" field should be empty

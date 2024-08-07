@@ -103,6 +103,8 @@
     </div> end Form -->
 
         <button id="createorder-btn">Create an order</button>
+        <button id="viewallorder-btn">View all orders</button>
+
 
         <!-- The Modal -->
         <div id="orderModal" class="modal">
@@ -137,19 +139,39 @@
 
         </div>
 
-        <!-- Search Results -->
+        <!-- Search Results Orders -->
         <div class="table-responsive col-md-12" id="search_results">
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th class="col-md-1">ID</th>
-                        <th class="col-md-4">Name</th>
-                        <th class="col-md-4">Category</th>
-                        <th class="col-md-3">Available</th>
-                        <th class="col-md-3">Gender</th>
-                        <th class="col-md-3">Birthday</th>
+                        <th class="col-md-1">Order ID</th>
+                        <th class="col-md-4">Customer ID</th>
+                        <th class="col-md-4">Created At</th>
+                        <th class="col-md-3">Shipping Address</th>
+                        <th class="col-md-3">Status</th>
+                        <th class="col-md-3">Item IDs</th>
                     </tr>
                 </thead>
+                <tbody id="search-results-body">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Search Results Items -->
+        <div class="table-responsive col-md-12" id="search_results_items">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th class="col-md-1">Item ID</th>
+                        <th class="col-md-4">Order ID</th>
+                        <th class="col-md-4">Product ID</th>
+                        <th class="col-md-3">Price</th>
+                        <th class="col-md-3">Product Description</th>
+                        <th class="col-md-3">Quantity</th>
+                    </tr>
+                </thead>
+                <tbody id="search-results-body-items">
+                </tbody>
             </table>
         </div>
 

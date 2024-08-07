@@ -17,6 +17,7 @@ from .factories import ItemFactory, OrderFactory
 
 logger = logging.getLogger("flask.app")
 
+# pylint: disable=too-many-lines
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
