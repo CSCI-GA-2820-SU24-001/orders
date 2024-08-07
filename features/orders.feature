@@ -6,10 +6,10 @@ Feature: The Orders service back-end
     Background:
         Given the following orders
             | id    | customer_id | shipping_address      | created_at                 | status  | items |
-            | 00000 | 00000       | 725 Broadway NY 10003 | 2024-08-07 02:42:07.086311 | CREATED | []    |
-            | 00001 | 00001       | 726 Broadway NY 10003 | 2024-07-05 02:42:07.086311 | CREATED | []    |
-            | 00002 | 00002       | 727 Broadway NY 10003 | 2024-08-02 02:42:07.086311 | CREATED | []    |
-            | 00003 | 00003       | 728 Broadway NY 10003 | 2024-08-01 02:42:07.086311 | CREATED | []    |
+            | 00000 | 00000       | 725 Broadway NY 10003 | 2024-08-07 02:42:07.086311 | CREATED | HELLO |
+            | 00001 | 00001       | 726 Broadway NY 10003 | 2024-07-05 02:42:07.086311 | CREATED | HELLO |
+            | 00002 | 00002       | 727 Broadway NY 10003 | 2024-08-02 02:42:07.086311 | CREATED | HELLO |
+            | 00003 | 00003       | 728 Broadway NY 10003 | 2024-08-01 02:42:07.086311 | CREATED | HELLO |
         And the following items
             | id | order_id | product_id | price | product_description | quantity |
             | 0  | 0        | 0          | 23.4  | Glucose             | 2        |
@@ -26,11 +26,11 @@ Feature: The Orders service back-end
     Scenario: Create an Order
         When I visit the "Home Page"
         And I press the "createOrder" button
-        And I set the "Item IDs" to "1, 2, 3"
+        And I set the "Item IDs" to "1"
         # And I select "False" in the "Available" dropdown
         # And I select "Male" in the "Gender" dropdown
-        And I set the "Item Quantities" to "1, 2, 3"
-        And I set the "Shipping Address" to "New York, NY, USA"
+        And I set the "Item Quantities" to "1"
+        And I set the "Shipping Address" to "NY"
         And I press the "SubmitOrder" button
         And I press the "closeOrderModal" button
         Then I should see "201" in the "Status" span

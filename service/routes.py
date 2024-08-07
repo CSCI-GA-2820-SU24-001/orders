@@ -158,11 +158,6 @@ def list_all_orders():
 @app.route("/orders", methods=["POST"])
 def create_order():
     """This method creates an order item given the items and their quantities"""
-    # This method creates an order item given the items and their quantities"""
-    # Assume POST request json data to have keys:
-    #    item_ids: int arr,
-    #    quantities: int arr,
-    #    customer ID: int
     data = request.json
     logger.info("*************DATA*********************")
     logger.info(request.json)
@@ -188,11 +183,20 @@ def create_order():
 
     order_obj.create()
 
-    logger.info("ORDER ID: ")
-    order_obj.deserialize(data)
+    app.logger.info("ORDER ID: ")
+    logger.error(order_obj.id)
 
     for item in data["items"]:
-        item["order_id"] = order_obj.id
+        new_item = Item(
+            order_id=order_obj.id,
+            product_id=item["product_id"],
+            quantity=item["quantity"],
+            price=item["price"],
+            product_description=item["product_description"],
+        )
+        new_item.create()
+        order_obj.items.append(new_item)
+    order_obj.update()
 
     # Create a message to return
     # for item in data["items"]:

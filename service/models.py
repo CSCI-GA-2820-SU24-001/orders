@@ -168,7 +168,9 @@ class Order(db.Model):
     status = db.Column(
         db.Enum(OrderStatus), nullable=False, server_default=(OrderStatus.CREATED.name)
     )
-    items = db.relationship("Item", backref="order", passive_deletes=True)
+    items = db.relationship(
+        "Item", backref="order", passive_deletes=True, cascade="all, delete-orphan"
+    )
 
     def __repr__(self):
         return f"<Order id=[{self.id}]>"

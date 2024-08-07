@@ -258,6 +258,164 @@ $(function () {
     });
 
 })
+
+
+$(document).ready(function () {
+    const url = "/orders"
+
+    // Function to fetch JSON data
+    function fetchJSONData() {
+        $.ajax({
+            url: url,
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                // Process the JSON response
+                fillTable(response);
+            },
+            error: function (error) {
+                console.log('Error fetching data', error);
+            }
+        });
+    }
+
+    // Function to fill the existing table with JSON data
+    function fillTable(data) {
+        if (data.length === 0) {
+            $('#search_results').html('<p>No data available</p>');
+            return;
+        }
+
+        // Get table body element
+        const tbody = $('#search-results-body');
+
+        // Clear any existing content
+        tbody.empty();
+
+        // Create table rows
+        data.forEach(item => {
+            const row = $('<tr>');
+            // Only add the first and second properties
+            const values = Object.values(item);
+            // Assuming the structure is known, you can directly access the values you want to keep
+            const created_at = values[0];
+            const customer_id = values[1];
+            const order_id = values[2];
+            const items = values[3];
+            const shipping_address = values[4];
+            const status = values[5];
+
+            $.ajax({
+                url: "/orders/" + order_id + "/items",
+                type: 'GET',
+                dataType: 'json',
+                success: function (response) {
+                    // Process the JSON response
+                    // var st = '';
+                    // for (resp in response) {
+                    //     st = st + resp["id"] + ",";
+                    // }
+                    const ids = response.map(item => item.id);
+                    row.append($('<td>').text(ids));
+                    console.log("RESPONSE");
+                    console.log(response);
+                },
+                error: function (error) {
+                    console.log('Error fetching data', error);
+                }
+            });
+
+            // Append only the desired columns
+            row.append($('<td>').text(order_id));
+            row.append($('<td>').text(customer_id));
+            row.append($('<td>').text(created_at));
+            // row.append($('<td>').text(items));
+            console.log("ITEMS: ");
+            console.log(items);
+            row.append($('<td>').text(shipping_address));
+            row.append($('<td>').text(status));
+
+
+            tbody.append(row);
+        });
+
+    }
+
+    // Attach click event listener to the button
+    $('#viewallorder-btn').click(function () {
+        fetchJSONData();
+    });
+});
+
+
+// // FUNCTION TO FILL ITEM TABLE
+// $(document).ready(function () {
+//     const url = "/orders"
+
+//     // Function to fetch JSON data
+//     function fetchJSONData() {
+//         $.ajax({
+//             url: url,
+//             type: 'GET',
+//             dataType: 'json',
+//             success: function (response) {
+//                 // Process the JSON response
+//                 fillTable(response);
+//             },
+//             error: function (error) {
+//                 console.log('Error fetching data', error);
+//             }
+//         });
+//     }
+
+//     // Function to fill the existing table with JSON data
+//     function fillTable(data) {
+//         if (data.length === 0) {
+//             $('#search_results').html('<p>No data available</p>');
+//             return;
+//         }
+
+//         // Get table body element
+//         const tbody = $('#search-results-body');
+
+//         // Clear any existing content
+//         tbody.empty();
+
+//         // Create table rows
+//         data.forEach(item => {
+//             const row = $('<tr>');
+//             // Only add the first and second properties
+//             const values = Object.values(item);
+//             // Assuming the structure is known, you can directly access the values you want to keep
+//             const created_at = values[0];
+//             const customer_id = values[1];
+//             const order_id = values[2];
+//             const items = values[3];
+//             const shipping_address = values[4];
+//             const status = values[5];
+
+
+//             // Append only the desired columns
+//             row.append($('<td>').text(order_id));
+//             row.append($('<td>').text(customer_id));
+//             row.append($('<td>').text(created_at));
+//             row.append($('<td>').text(items));
+//             console.log("ITEMS: ");
+//             console.log(items);
+//             row.append($('<td>').text(shipping_address));
+//             row.append($('<td>').text(status));
+
+
+//             tbody.append(row);
+//         });
+//     }
+
+//     // Attach click event listener to the button
+//     $('#viewallorder-btn').click(function () {
+//         fetchJSONData();
+//     });
+// });
+
 var modal = document.getElementById("orderModal");
 
 var btn = document.getElementById("createorder-btn");
