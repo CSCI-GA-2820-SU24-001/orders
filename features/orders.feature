@@ -3,12 +3,24 @@ Feature: The Orders service back-end
     I need a RESTful catalog service
     So that I can keep track of all orders
 
-Background:
+    Background:
+        Given the following orders
+            | id    | customer_id | shipping_address      | created_at                 | status  | items |
+            | 00000 | 00000       | 725 Broadway NY 10003 | 2024-08-07 02:42:07.086311 | CREATED | []    |
+            | 00001 | 00001       | 726 Broadway NY 10003 | 2024-07-05 02:42:07.086311 | CREATED | []    |
+            | 00002 | 00002       | 727 Broadway NY 10003 | 2024-08-02 02:42:07.086311 | CREATED | []    |
+            | 00003 | 00003       | 728 Broadway NY 10003 | 2024-08-01 02:42:07.086311 | CREATED | []    |
+        And the following items
+            | id | order_id | product_id | price | product_description | quantity |
+            | 0  | 0        | 0          | 23.4  | Glucose             | 2        |
+            | 1  | 1        | 1          | 23.4  | Glucose             | 2        |
+            | 2  | 2        | 2          | 23.4  | Glucose             | 2        |
+            | 3  | 3        | 3          | 23.4  | Glucose             | 2        |
 
-Scenario: The server is running
-    When I visit the "Home Page"
-    Then I should see "Order API" in the title
-    And I should not see "404 Not Found"
+    Scenario: The server is running
+        When I visit the "Home Page"
+        Then I should see "Order API" in the title
+        And I should not see "404 Not Found"
 
 
     Scenario: Create an Order
