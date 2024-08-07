@@ -34,6 +34,16 @@ Feature: The Orders service back-end
         And I press the "SubmitOrder" button
         And I press the "closeOrderModal" button
         Then I should see "201" in the "Status" span
+
+    Scenario: View all Orders
+        When I visit the "Home Page"
+        And I press the "viewallorder" button
+        Then I should see "725 Broadway NY 10003" in the results
+        And I should see "726 Broadway NY 10003" in the results
+        And I should see "727 Broadway NY 10003" in the results
+        And I should see "728 Broadway NY 10003" in the results
+
+
 # When I copy the "Id" field
 # And I press the "Clear" button
 # Then the "Id" field should be empty
