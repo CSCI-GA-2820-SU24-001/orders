@@ -348,73 +348,90 @@ $(document).ready(function () {
 });
 
 
-// // FUNCTION TO FILL ITEM TABLE
-// $(document).ready(function () {
-//     const url = "/orders"
+// FUNCTION TO FILL ITEM TABLE
+$(document).ready(function () {
+    const url = "/orders"
 
-//     // Function to fetch JSON data
-//     function fetchJSONData() {
-//         $.ajax({
-//             url: url,
-//             type: 'GET',
-//             dataType: 'json',
-//             success: function (response) {
-//                 // Process the JSON response
-//                 fillTable(response);
-//             },
-//             error: function (error) {
-//                 console.log('Error fetching data', error);
-//             }
-//         });
-//     }
+    // Function to fetch JSON data
+    function fetchJSONDataItems() {
+        $.ajax({
+            url: url,
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                // Process the JSON response
+                fillTableItems(response);
+            },
+            error: function (error) {
+                console.log('Error fetching data', error);
+            }
+        });
+    }
 
-//     // Function to fill the existing table with JSON data
-//     function fillTable(data) {
-//         if (data.length === 0) {
-//             $('#search_results').html('<p>No data available</p>');
-//             return;
-//         }
+    // Function to fill the existing table with JSON data
+    function fillTableItems(data) {
+        if (data.length === 0) {
+            $('#search_results_items').html('<p>No data available</p>');
+            return;
+        }
 
-//         // Get table body element
-//         const tbody = $('#search-results-body');
+        // Get table body element
+        const tbody = $('#search-results-body-items');
 
-//         // Clear any existing content
-//         tbody.empty();
+        // Clear any existing content
+        tbody.empty();
+        var done_prods = []
 
-//         // Create table rows
-//         data.forEach(item => {
-//             const row = $('<tr>');
-//             // Only add the first and second properties
-//             const values = Object.values(item);
-//             // Assuming the structure is known, you can directly access the values you want to keep
-//             const created_at = values[0];
-//             const customer_id = values[1];
-//             const order_id = values[2];
-//             const items = values[3];
-//             const shipping_address = values[4];
-//             const status = values[5];
+        // Create table rows
+        data.forEach(item => {
+            const row = $('<tr>');
+            const values = Object.values(item);
+            const order_id = values[2];
 
-
-//             // Append only the desired columns
-//             row.append($('<td>').text(order_id));
-//             row.append($('<td>').text(customer_id));
-//             row.append($('<td>').text(created_at));
-//             row.append($('<td>').text(items));
-//             console.log("ITEMS: ");
-//             console.log(items);
-//             row.append($('<td>').text(shipping_address));
-//             row.append($('<td>').text(status));
+            $.ajax({
+                url: "/orders/" + order_id + "/items",
+                type: 'GET',
+                dataType: 'json',
+                success: function (response) {
+                    console.log(response);
+                    response.forEach(item => {
+                        let row = $('<tr></tr>');
+                        var item_id = item["id"];
+                        var product_id = item["product_id"];
 
 
-//             tbody.append(row);
-//         });
-//     }
+                        var order_id = item["order_id"];
+                        var price = item["price"];
+                        var product_desc = item["product_description"];
+                        var quantity = item["quantity"];
+                        if (done_prods.indexOf(product_id) == -1) {
+                            // row.append($('<td></td>').text(item_id));
+                            row.append($('<td></td>').text(product_id));
+                            row.append($('<td></td>').text(price));
+                            row.append($('<td></td>').text(product_desc));
 
-//     // Attach click event listener to the button
-//     $('#viewallorder-btn').click(function () {
-//         fetchJSONData();
-//     });
-// });
+                            done_prods.push(product_id);
+                            console.log("ARRAY");
+                            console.log(done_prods);
+                            tbody.append(row);
+                        }
+                    });
+                },
+                error: function (error) {
+                    console.log('Error fetching data', error);
+                }
+            });
+
+            tbody.append(row);
+        });
+
+    }
+
+    // Attach click event listener to the button
+    $('#viewallitems-btn').click(function () {
+        fetchJSONDataItems();
+    });
+});
 
 var modal = document.getElementById("orderModal");
 
