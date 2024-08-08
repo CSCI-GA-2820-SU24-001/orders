@@ -24,7 +24,7 @@ from datetime import datetime
 import logging
 from flask import jsonify, request, url_for, abort
 from flask import current_app as app  # Import Flask application
-from flask_restx import Resource, fields, reqparse
+from flask_restx import Resource, fields, reqparse  # noqa: F401
 from service.models import Order, Item, OrderStatus
 from service.common import status  # HTTP Status Codes
 from .models import db
