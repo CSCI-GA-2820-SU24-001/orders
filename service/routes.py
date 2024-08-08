@@ -24,9 +24,11 @@ from datetime import datetime
 import logging
 from flask import jsonify, request, url_for, abort
 from flask import current_app as app  # Import Flask application
+from flask_restx import Resource, fields, reqparse
 from service.models import Order, Item, OrderStatus
 from service.common import status  # HTTP Status Codes
 from .models import db
+from . import api
 
 logger = logging.getLogger("flask.app")
 
@@ -124,6 +126,115 @@ def index():
     #     status.HTTP_200_OK,
     # )
 
+
+# Define the model so that the docs reflect what can be sent
+item_create_model = api.model(
+    "ItemCreateModel",
+    {
+        "order_id": fields.Integer(
+            required=True, description="The Order an Item is belonged to"
+        ),
+        "product_id": fields.Integer(
+            required=True, description="The product an Item is belonged to"
+        ),
+        "product_description": fields.String(
+            required=True, description="The description for the Item"
+        ),
+        "quantity": fields.Integer(
+            required=True, description="The quantity of the Item ordered"
+        ),
+        "price": fields.Float(required=True, description="The unit price for the Item"),
+    },
+)
+
+item_model = api.inherit(
+    "ItemModel",
+    item_create_model,
+    {"id": fields.Integer(readOnly=True, description="The ID of the Item")},
+)
+
+order_create_model = api.model(
+    "OrderCreateModel",
+    {
+        "customer_id": fields.Integer(
+            required=True, description="The ID of the customer ordering the Order"
+        ),
+        "status": fields.String(
+            enum=[e.name for e in OrderStatus], description="The status of the Order"
+        ),
+        "shipping_address": fields.String(
+            required=True, description="The place where the Order is delivered to"
+        ),
+        "items": fields.List(
+            fields.Nested(item_create_model),
+            required=False,
+            description="The items under the Order",
+        ),
+    },
+)
+
+order_model = api.inherit(
+    "OrderModel",
+    order_create_model,
+    {
+        "id": fields.Integer(
+            readOnly=True, description="The unique id assigned internally by service"
+        ),
+        "created_at": fields.DateTime,
+        "updated_at": fields.DateTime,
+    },
+)
+
+status_update_model = api.model(
+    "StatusUpdateModel",
+    {
+        "status": fields.String(
+            required=True,
+            description="The new status of the Order",
+            enum=[e.name for e in OrderStatus],
+        ),
+    },
+)
+
+# query string arguments
+item_args = reqparse.RequestParser()
+item_args.add_argument(
+    "product_id",
+    type=int,
+    location="args",
+    required=False,
+    help="List Items with a specific product id",
+)
+item_args.add_argument(
+    "quantity",
+    type=int,
+    location="args",
+    required=False,
+    help="List Items with a specific quantity",
+)
+item_args.add_argument(
+    "price",
+    type=float,
+    location="args",
+    required=False,
+    help="List Items with a specific price",
+)
+
+order_args = reqparse.RequestParser()
+order_args.add_argument(
+    "customer_id",
+    type=int,
+    location="args",
+    required=False,
+    help="List Orders from a specific customer",
+)
+order_args.add_argument(
+    "status",
+    type=str,
+    location="args",
+    required=False,
+    help="List Orders with a specific Order status",
+)
 
 ######################################################################
 #  R E S T   A P I   E N D P O I N T S
