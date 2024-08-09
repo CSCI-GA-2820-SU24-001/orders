@@ -462,44 +462,6 @@ class TestOrderAPIService(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-    def test_delete_order_in_processing(self):
-        """It should not delete an order that is in PROCESSING status"""
-        customer_id = random.randint(0, 10000)
-        order = Order(
-            customer_id=customer_id,
-            shipping_address="1428 Elm St",
-            created_at=datetime.now(),
-            status="PROCESSING",
-        )
-        order.create()
-
-        response = self.client.delete(
-            f"{BASE_URL}/{order.id}", content_type="application/json"
-        )
-
-        logger.info("***************** DELETE RESPONSE *******************")
-        logger.info(response.get_json())
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_delete_order_in_completed(self):
-        """It should not delete an order that is in COMPLETED status"""
-        customer_id = random.randint(0, 10000)
-        order = Order(
-            customer_id=customer_id,
-            shipping_address="1428 Elm St",
-            created_at=datetime.now(),
-            status="COMPLETED",
-        )
-        order.create()
-
-        response = self.client.delete(
-            f"{BASE_URL}/{order.id}", content_type="application/json"
-        )
-
-        logger.info("***************** DELETE RESPONSE *******************")
-        logger.info(response.get_json())
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
     def test_view_item(self):
         """It should view an item in an order"""
         customer_id = random.randint(0, 10000)

@@ -433,6 +433,84 @@ $(document).ready(function () {
     });
 });
 
+$(document).ready(function () {
+    const url = "/orders";
+
+function fetchJSONDataByStatus(status) {
+    const queryUrl = `${url}?status_name=${status}`;
+    console.log('Fetching data from:', queryUrl); 
+    $.ajax({
+        url: queryUrl,
+        type: 'GET',
+        dataType: 'json',
+        success: function (response) {
+            fillTable(response);
+        },
+        error: function (error) {
+            console.log('Error fetching data', error);
+        }
+    });
+}
+
+    function fillTable(data) {
+        if (data.length === 0) {
+            $('#search_results').html('<p>No data available</p>');
+            return;
+        }
+
+        const tbody = $('#search-results-body');
+
+        tbody.empty();
+
+        data.forEach(item => {
+            const row = $('<tr>');
+            const values = Object.values(item);
+            const created_at = values[0];
+            const customer_id = values[1];
+            const order_id = values[2];
+            const items = values[3];
+            const shipping_address = values[4];
+            const status = values[5];
+
+            $.ajax({
+                url: `/orders/${order_id}/items`,
+                type: 'GET',
+                dataType: 'json',
+                success: function (response) {
+                    const ids = response.map(item => item.id);
+                    row.append($('<td>').text(ids));
+                    console.log("RESPONSE");
+                    console.log(response);
+                },
+                error: function (error) {
+                    console.log('Error fetching data', error);
+                }
+            });
+
+            row.append($('<td>').text(order_id));
+            row.append($('<td>').text(customer_id));
+            row.append($('<td>').text(created_at));
+            row.append($('<td>').text(shipping_address));
+            row.append($('<td>').text(status));
+
+            tbody.append(row);
+        });
+    }
+
+    $('#query-created-btn').click(function () {
+        fetchJSONDataByStatus('CREATED');
+    });
+
+    $('#query-processed-btn').click(function () {
+        fetchJSONDataByStatus('PROCESSED');
+    });
+
+    $('#query-completed-btn').click(function () {
+        fetchJSONDataByStatus('COMPLETED');
+    });
+});
+
+
 var modal = document.getElementById("orderModal");
 
 var btn = document.getElementById("createorder-btn");
