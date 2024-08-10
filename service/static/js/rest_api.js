@@ -436,28 +436,23 @@ $(document).ready(function () {
 $(document).ready(function () {
     const url = "/orders";
 
-function fetchJSONDataByStatus(status) {
-    const queryUrl = `${url}?status_name=${status}`;
-    console.log('Fetching data from:', queryUrl); 
-    $.ajax({
-        url: queryUrl,
-        type: 'GET',
-        dataType: 'json',
-        success: function (response) {
-            fillTable(response);
-        },
-        error: function (error) {
-            console.log('Error fetching data', error);
-        }
-    });
-}
+    function fetchJSONDataByStatus(status) {
+        const queryUrl = `${url}?status_name=${status}`;
+        console.log('Fetching data from:', queryUrl);
+        $.ajax({
+            url: queryUrl,
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                fillTable(response);
+            },
+            error: function (error) {
+                console.log('Error fetching data', error);
+            }
+        });
+    }
 
     function fillTable(data) {
-        if (data.length === 0) {
-            $('#search_results').html('<p>No data available</p>');
-            return;
-        }
-
         const tbody = $('#search-results-body');
 
         tbody.empty();
@@ -497,16 +492,12 @@ function fetchJSONDataByStatus(status) {
         });
     }
 
-    $('#query-created-btn').click(function () {
-        fetchJSONDataByStatus('CREATED');
-    });
-
-    $('#query-processing-btn').click(function () {
-        fetchJSONDataByStatus('PROCESSING');
-    });
-
-    $('#query-completed-btn').click(function () {
-        fetchJSONDataByStatus('COMPLETED');
+    // Trigger the query when the dropdown value changes
+    $('#order_status').change(function () {
+        const selectedStatus = $(this).val();
+        if (selectedStatus) {
+            fetchJSONDataByStatus(selectedStatus);
+        }
     });
 });
 

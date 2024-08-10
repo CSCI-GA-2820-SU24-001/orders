@@ -66,7 +66,7 @@ Feature: The Orders service back-end
 
     Scenario: Query Completed Orders
         When I visit the "Home Page"
-        And I press the "query-completed" button
+        And I select "Completed" in the "Order Status" dropdown
         Then I should see "728 Broadway NY 10003" in the results
         And I should see "COMPLETED" in the results
         And I should not see "CREATED" in the results

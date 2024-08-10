@@ -108,9 +108,18 @@
 
         <br><br>
 
-        <button id="query-created-btn">Query Created Orders</button>
-        <button id="query-processing-btn">Query Processed Orders</button>
-        <button id="query-completed-btn">Query Completed Orders</button>
+        <!-- Status Dropdown -->
+        <div class="form-group">
+            <div class="form-group">
+                <label for="order_status">Order Status:</label>
+                <select class="form-control" id="order_status" style="width: auto;">
+                    <option disabled>Select</option>
+                    <option value="CREATED">Created</option>
+                    <option value="PROCESSING">Processing</option>
+                    <option value="COMPLETED">Completed</option>
+                </select>
+            </div>
+        </div>
 
 
         <!-- The Modal -->
