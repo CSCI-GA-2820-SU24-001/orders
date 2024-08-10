@@ -501,8 +501,8 @@ function fetchJSONDataByStatus(status) {
         fetchJSONDataByStatus('CREATED');
     });
 
-    $('#query-processed-btn').click(function () {
-        fetchJSONDataByStatus('PROCESSED');
+    $('#query-processing-btn').click(function () {
+        fetchJSONDataByStatus('PROCESSING');
     });
 
     $('#query-completed-btn').click(function () {
