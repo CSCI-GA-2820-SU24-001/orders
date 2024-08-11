@@ -63,7 +63,7 @@ def step_impl(context, element_name, text_string):
 
 @when('I select "{text}" in the "{element_name}" dropdown')
 def step_impl(context, text, element_name):
-    element_id = ID_PREFIX + element_name.lower().replace(" ", "_")
+    element_id = element_name.lower().replace(" ", "_")
     element = Select(context.driver.find_element(By.ID, element_id))
     element.select_by_visible_text(text)
 

@@ -413,19 +413,13 @@ def delete_order(order_id):
 
     curr_order = Order.query.filter_by(id=order_id).first()
 
-    if curr_order.status != OrderStatus.CREATED:
-        abort(
-            status.HTTP_400_BAD_REQUEST,
-            f"Order {order_id} cannot be deleted in its current status",
-        )
+    if curr_order:
+        logger.info("*************ORDER TO DELETE*********************")
+        logger.info(curr_order.serialize())
+        curr_order.delete()
+        logger.info("Order deleted successfully")
 
-    logger.info("*************ORDER TO DELETE*********************")
-    logger.info(curr_order.serialize())
-
-    curr_order.delete()
-
-    logger.info("Order deleted successfully")
-
+    # Even if the order was not found, still return 204 No Content
     return "", status.HTTP_204_NO_CONTENT
 
 
