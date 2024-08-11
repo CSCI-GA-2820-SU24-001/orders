@@ -445,6 +445,7 @@ $(document).ready(function () {
             dataType: 'json',
             success: function (response) {
                 fillTable(response);
+                flash_message("Success");
             },
             error: function (error) {
                 console.log('Error fetching data', error);
@@ -492,7 +493,11 @@ $(document).ready(function () {
         });
     }
 
-    // Trigger the query when the dropdown value changes
+    function flash_message(message) {
+        $("#orders_status").empty();
+        $("#orders_status").append(message);
+    }
+
     $('#order_status').change(function () {
         const selectedStatus = $(this).val();
         if (selectedStatus) {
