@@ -6,10 +6,10 @@ Feature: The Orders service back-end
     Background:
         Given the following orders
             | id    | customer_id | shipping_address      | created_at                 | status    | items |
-            | 00000 | 00000       | 725 Broadway NY 10003 | 2024-08-07 02:42:07.086311 | CREATED   | []    |
-            | 00001 | 00001       | 726 Broadway NY 10003 | 2024-07-05 02:42:07.086311 | CREATED   | []    |
-            | 00002 | 00002       | 727 Broadway NY 10003 | 2024-08-02 02:42:07.086311 | CREATED   | []    |
-            | 00003 | 00003       | 728 Broadway NY 10003 | 2024-08-01 02:42:07.086311 | COMPLETED | []    |
+            | 00000 | 00111       | 725 Broadway NY 10003 | 2024-08-07 02:42:07.086311 | CREATED   | []    |
+            | 00001 | 00222       | 726 Broadway NY 10003 | 2024-07-05 02:42:07.086311 | CREATED   | []    |
+            | 00002 | 00333       | 727 Broadway NY 10003 | 2024-08-02 02:42:07.086311 | CREATED   | []    |
+            | 00003 | 00444       | 728 Broadway NY 10003 | 2024-08-01 02:42:07.086311 | COMPLETED | []    |
         And the following items
             | id | order_id | product_id | price | product_description | quantity |
             | 0  | 0        | 0          | 23.4  | Glucose             | 2        |
@@ -84,5 +84,17 @@ Feature: The Orders service back-end
         And I should see "728 Broadway NY 10003" in the results
         And I should see "COMPLETED" in the results
         And I should not see "CREATED" in the results
+
+
+    Scenario: Query Orders by Customer ID
+        When I visit the "Home Page"
+        And I press the "searchbycustomerid" button
+        And I set the "Customer ID" to "111"
+        And I press the "searchcustomerid" button
+        Then I should see the message "Success"
+        And I should see "111" in the results
+        And I should not see "222" in the results
+        And I should not see "333" in the results
+        And I should not see "444" in the results
 
 

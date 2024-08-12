@@ -508,6 +508,103 @@ $(document).ready(function () {
     });
 });
 
+$(document).ready(function () {
+    const url = "/orders";
+
+    var customerIdModal = document.getElementById("customerIdModal");
+    var searchByCustomerIdBtn = document.getElementById("searchbycustomerid-btn");
+    var closeCustomerIdModalBtn = document.getElementById("closeCustomerIdModal-btn");
+
+    searchByCustomerIdBtn.onclick = function () {
+        customerIdModal.style.display = "block";
+    }
+
+    closeCustomerIdModalBtn.onclick = function () {
+        customerIdModal.style.display = "none";
+    }
+
+    window.onclick = function (event) {
+        if (event.target == customerIdModal) {
+            customerIdModal.style.display = "none";
+        }
+    }
+
+    function fetchJSONDataByCustomerId(customer_id) {
+        const queryUrl = `${url}?customer_id=${customer_id}`;
+        console.log('Fetching data from:', queryUrl);
+        $.ajax({
+            url: queryUrl,
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response && response.length > 0) {
+                    fillTable(response);
+                    flash_message("Success");
+                } else {
+                    flash_message("404");
+                }            },
+            error: function (error) {
+                console.log('Error fetching data', error);
+                flash_message("Error fetching data");
+            }
+        });
+    }
+
+    function fillTable(data) {
+        const tbody = $('#search-results-body');
+
+        tbody.empty();
+
+        data.forEach(item => {
+            const row = $('<tr>');
+            const values = Object.values(item);
+            const created_at = values[0];
+            const customer_id = values[1];
+            const order_id = values[2];
+            const items = values[3];
+            const shipping_address = values[4];
+            const status = values[5];
+
+            $.ajax({
+                url: `/orders/${order_id}/items`,
+                type: 'GET',
+                dataType: 'json',
+                success: function (response) {
+                    const ids = response.map(item => item.id);
+                    row.append($('<td>').text(ids));
+                    console.log("RESPONSE");
+                    console.log(response);
+                },
+                error: function (error) {
+                    console.log('Error fetching data', error);
+                }
+            });
+
+            row.append($('<td>').text(order_id));
+            row.append($('<td>').text(customer_id));
+            row.append($('<td>').text(created_at));
+            row.append($('<td>').text(shipping_address));
+            row.append($('<td>').text(status));
+
+            tbody.append(row);
+        });
+    }
+
+    function flash_message(message) {
+        $("#orders_status").empty();
+        $("#orders_status").append(message);
+    }
+
+    $("#customerIdForm").submit(function (event) {
+        event.preventDefault();
+        const customer_id = $('#orders_customer_id').val();
+        if (customer_id) {
+            fetchJSONDataByCustomerId(customer_id);
+            customerIdModal.style.display = "none";
+        }
+    });
+});
+
 
 var modal = document.getElementById("orderModal");
 var updatemodal = document.getElementById("updateorderModal");
