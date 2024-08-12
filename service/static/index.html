@@ -106,7 +106,11 @@
         <button id="viewallorder-btn">View all orders</button>
         <button id="viewallitems-btn">View all items</button>
 
-        <br><br>
+        <br>
+        
+        <button id="searchbycustomerid-btn">Search by Customer ID</button>
+
+        <br>
 
         <!-- Status Dropdown -->
         <div class="form-group">
@@ -118,6 +122,20 @@
                     <option value="PROCESSING">Processing</option>
                     <option value="COMPLETED">Completed</option>
                 </select>
+            </div>
+        </div>
+
+        <!-- Customer ID Query Search -->
+        <div id="customerIdModal" class="modal">
+            <div class="modal-content">
+                <span class="close" id="closeCustomerIdModal-btn">&times;</span>
+                <form id="customerIdForm">
+                    <div class="form-group">
+                        <label for="customerId">Customer ID:</label>
+                        <input type="text" id="orders_customer_id" name="customerId" class="form-control" placeholder="Enter Customer ID" required>
+                    </div>
+                    <button type="submit" id="searchcustomerid-btn">Search</button>
+                </form>
             </div>
         </div>
 
