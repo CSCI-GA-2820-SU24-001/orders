@@ -76,13 +76,14 @@ def step_impl(context):
                 "product_description": "Candy",
             }
         )
-        print(payload)
+        # print(payload)
         context.resp = requests.post(
             rest_endpoint,
             json=payload,
             timeout=WAIT_TIMEOUT,
         )
-        print(context.resp)
+        data = context.resp.json()
+        context.valid_order_id = data["order_id"]
         expect(context.resp.status_code).equal_to(HTTP_201_CREATED)
 
 

@@ -302,8 +302,10 @@ $(document).ready(function () {
             const customer_id = values[1];
             const order_id = values[2];
             const items = values[3];
-            const shipping_address = values[4];
-            const status = values[5];
+            const order_id_dup = values[4];
+
+            const shipping_address = values[5];
+            const status = values[6];
 
             $.ajax({
                 url: "/orders/" + order_id + "/items",
@@ -434,8 +436,14 @@ $(document).ready(function () {
 });
 
 var modal = document.getElementById("orderModal");
+var updatemodal = document.getElementById("updateorderModal");
+
 
 var btn = document.getElementById("createorder-btn");
+var btn_update = document.getElementById("updateorder-btn");
+
+var close_update = document.getElementById("updatecloseordermodal-btn")
+
 
 var span = document.getElementsByClassName("close")[0];
 
@@ -447,11 +455,45 @@ span.onclick = function () {
     modal.style.display = "none";
 }
 
+
 window.onclick = function (event) {
     if (event.target == modal) {
         modal.style.display = "none";
     }
 }
+
+btn_update.onclick = function () {
+    updatemodal.style.display = "block";
+}
+
+// window.onclick = function (event) {
+//     if (event.target == modal) {
+//         updatemodal.style.display = "none";
+//     }
+// }
+
+close_update.onclick = function () {
+    updatemodal.style.display = "none";
+}
+
+// UPDATE ORDER
+
+
+function createRequestObject(array_ids, array_quantities, shippingAddress) {
+    let items = [];
+    for (let i = 0; i < array_ids.length; i++) {
+        items.push({
+            id: array_ids[i],
+            quantity: array_quantities[i]
+        });
+    }
+
+    return {
+        items: items,
+        shippingAddress: shippingAddress
+    };
+}
+
 
 document.getElementById("orderForm").onsubmit = function (event) {
     event.preventDefault();
@@ -568,6 +610,127 @@ document.getElementById("orderForm").onsubmit = function (event) {
         });
     }
 }
+
+document.getElementById("updateorderForm").onsubmit = function (event) {
+    event.preventDefault();
+    var isValid = true;
+
+    // Validate Order Name
+    // var orderName = document.getElementById("orderName").value;
+    // if (!orderName) {
+    //     document.getElementById("orderNameError").style.display = "block";
+    //     isValid = false;
+    // } else {
+    //     document.getElementById("orderNameError").style.display = "none";
+    // }
+
+    var orderID = document.getElementById("orders_id").value;
+
+
+    // Validate Item IDs
+    var itemIds = document.getElementById("orders_update_item_ids").value;
+    if (!itemIds) {
+        document.getElementById("itemIdsError").style.display = "block";
+        isValid = false;
+    } else {
+        document.getElementById("itemIdsError").style.display = "none";
+    }
+
+    // Validate Item Quantities
+    var itemQuantities = document.getElementById("orders_update_item_quantities").value;
+    if (!itemQuantities) {
+        document.getElementById("itemQuantitiesError").style.display = "block";
+        isValid = false;
+    } else {
+        document.getElementById("itemQuantitiesError").style.display = "none";
+    }
+
+    // Validate Shipping Address
+    var shippingAddress = document.getElementById("orders_update_shipping_address").value;
+    if (!shippingAddress) {
+        document.getElementById("shippingAddressError").style.display = "block";
+        isValid = false;
+    } else {
+        document.getElementById("shippingAddressError").style.display = "none";
+    }
+
+    // If all fields are valid, create JSON object
+    if (isValid) {
+        // var orderData = {
+        //     itemIds: itemIds,
+        //     itemQuantities: itemQuantities,
+        //     shippingAddress: shippingAddress
+        // };
+
+        // var orderJSON = JSON.stringify(orderData);
+        // console.log(orderJSON);
+
+        const array_ids = itemIds.split(',');
+        const array_quantities = itemQuantities.split(',');
+
+        var array_ids_temp = new Array();
+        var array_item_temp = new Array();
+
+        console.log("ARRAY ITEM STRING: ");
+        console.log("ARRAY IDS STRING: ");
+
+        console.log(array_ids);
+        console.log(array_quantities);
+
+
+        for (var i = 0; i < array_ids.length; i++) {
+            array_ids_temp[i] = parseInt(array_ids[i].replace(/\s/g, ''), 10);
+            if (isNaN(array_ids_temp[i])) {
+                alert("Invalid Input");
+                return
+            }
+        }
+
+        for (var i = 0; i < array_quantities.length; i++) {
+            array_item_temp[i] = parseInt(array_quantities[i].replace(/\s/g, ''), 10);
+            if (isNaN(array_item_temp[i])) {
+                alert("Invalid Input");
+                return
+            }
+        }
+        console.log("ARRAY ITEM: ");
+        console.log("ARRAY IDS: ");
+
+        console.log(array_item_temp);
+        console.log(array_ids_temp);
+
+        if (array_ids.length != array_quantities.length) {
+            alert("Number of item IDs and quantities must match");
+            return;
+        }
+
+
+        var requestObject = createRequestObject(array_ids_temp, array_item_temp, shippingAddress);
+        console.log(JSON.stringify(requestObject));
+
+        let ajax = $.ajax({
+            type: "PUT",
+            url: `/orders/${orderID}`,
+            contentType: "application/json",
+            data: JSON.stringify(requestObject),
+        });
+
+        ajax.done(function (res, textStatus, xhr) {
+            flash_message_create(res)
+            console.log("RESULT: ");
+            console.log(res);
+            console.log(xhr.status);
+            $("#orders_status").text(xhr.status);
+        });
+
+        ajax.fail(function (res) {
+            flash_message_create(res.responseJSON.message)
+            console.log(res);
+        });
+    }
+}
+
+
 function generateRandomCustomerId() {
     return Math.floor(Math.random() * 10001);
 }

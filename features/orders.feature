@@ -43,6 +43,19 @@ Feature: The Orders service back-end
         And I should see "727 Broadway NY 10003" in the results
         And I should see "728 Broadway NY 10003" in the results
 
+    Scenario: Update an Order
+        When I visit the "Home Page"
+        And I press the "updateOrder" button
+        And I set the "ID" to existing order id
+        And I set the "Update Item IDs" to "1"
+        # And I select "False" in the "Available" dropdown
+        # And I select "Male" in the "Gender" dropdown
+        And I set the "Update Item Quantities" to "1"
+        And I set the "Update Shipping Address" to "UPDATE"
+        And I press the "UpdateCurrOrder" button
+        And I press the "updatecloseordermodal" button
+        Then I should see "200" in the "Status" span
+
     Scenario: View all Items
         When I visit the "Home Page"
         And I press the "viewallitems" button
