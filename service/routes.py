@@ -379,7 +379,10 @@ def update_order(order_id):
 
         new_status_enum = OrderStatus[new_status]
         valid_transitions = {
-            OrderStatus.CREATED: [OrderStatus.PROCESSING],
+            OrderStatus.CREATED: [
+                OrderStatus.CREATED,
+                OrderStatus.PROCESSING,
+            ],  # ADDED TO ALLOW UPDATING ORDER
             OrderStatus.PROCESSING: [OrderStatus.COMPLETED],
             OrderStatus.COMPLETED: [],
         }
@@ -612,7 +615,10 @@ def change_status(order_id):
 
     new_status_enum = OrderStatus[new_status]
     valid_transitions = {
-        OrderStatus.CREATED: [OrderStatus.PROCESSING],
+        OrderStatus.CREATED: [
+            OrderStatus.CREATED,
+            OrderStatus.PROCESSING,
+        ],  # ADD TO ALLOW UPDATING ORDERS
         OrderStatus.PROCESSING: [OrderStatus.COMPLETED],
         OrderStatus.COMPLETED: [],
     }

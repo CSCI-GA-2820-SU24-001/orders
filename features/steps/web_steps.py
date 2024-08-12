@@ -199,3 +199,14 @@ def step_impl(context, text_string, element_name):
     text = span.get_attribute("innerHTML")
 
     assert text == text_string
+
+
+@when('I set the "{element_name}" to existing order id')
+def step_impl(context, element_name):
+    element_id = ID_PREFIX + element_name.lower().replace(" ", "_")
+    element = WebDriverWait(context.driver, context.wait_seconds).until(
+        expected_conditions.presence_of_element_located((By.ID, element_id))
+    )
+    element.clear()
+    print(context.valid_order_id)
+    element.send_keys(context.valid_order_id)

@@ -103,6 +103,8 @@
     </div> end Form -->
 
         <button id="createorder-btn">Create an order</button>
+        <button id="updateorder-btn">Update an order</button>
+
         <button id="viewallorder-btn">View all orders</button>
         <button id="viewallitems-btn">View all items</button>
 
@@ -155,6 +157,43 @@
 
         </div>
 
+        <!-- UPDATE MODAL -->
+        <div id="updateorderModal" class="modal">
+
+            <!-- Modal content -->
+            <div class="modal-content">
+                <span class="close" id="updatecloseordermodal-btn">&times;</span>
+                <form id="updateorderForm">
+                    <!-- <div class="form-group">
+                        <label for="orderName">Order Name</label>
+                        <input type="text" id="orderName" name="orderName" required>
+                        <span class="error" id="orderNameError">Order Name is required</span>
+                    </div> -->
+                    <div class="form-group">
+                        <label for="orderID">Order ID</label>
+                        <input type="text" id="orders_id" name="orderID" required>
+                        <span class="error" id="itemIdsError">Order ID is required</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="itemIds">Item IDs (separated by commas)</label>
+                        <input type="text" id="orders_update_item_ids" name="itemIds" required>
+                        <span class="error" id="itemIdsError">Item IDs are required</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="itemQuantities">Item Quantities (separated by commas)</label>
+                        <input type="text" id="orders_update_item_quantities" name="itemQuantities" required>
+                        <span class="error" id="itemQuantitiesError">Item Quantities are required</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="shippingAddress">Shipping Address</label>
+                        <textarea id="orders_update_shipping_address" name="shippingAddress" required></textarea>
+                        <span class="error" id="shippingAddressError">Shipping Address is required</span>
+                    </div>
+                    <button type="submit" id="updatecurrorder-btn">Update Order</button>
+                </form>
+            </div>
+
+        </div>
         <!-- Search Results Orders -->
         <div class="table-responsive col-md-12" id="search_results">
             <table class="table table-striped">
