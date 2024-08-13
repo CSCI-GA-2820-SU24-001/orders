@@ -197,6 +197,7 @@ def step_impl(context, text_string, element_name):
     element_id = ID_PREFIX + element_name.lower().replace(" ", "_")
     span = context.driver.find_element(By.ID, element_id)
     text = span.get_attribute("innerHTML")
+    print(text)
 
     assert text == text_string
 
