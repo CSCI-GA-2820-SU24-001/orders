@@ -112,6 +112,7 @@
 
         <br>
 
+        <button id="changeorderstatus-btn">Change Order Status</button>
         <button id="searchbycustomerid-btn">Search by Customer ID</button>
 
         <br>
@@ -143,6 +144,31 @@
                 </form>
             </div>
         </div>
+
+        <!-- Status Update -->
+        <div id="updateOrderStatusModal" class="modal">
+            <div class="modal-content">
+                <span class="close" id="closeUpdateOrderStatusModal-btn">&times;</span>
+                <form id="updateOrderStatusForm">
+                    <div class="form-group">
+                        <label for="orders_id_update">Order ID:</label>
+                        <input type="text" id="orders_id_update" class="form-control" placeholder="Enter Order ID" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new_order_status">New Status:</label>
+                        <select class="form-control" id="new_order_status">
+                            <option value="CREATED">Created</option>
+                            <option value="PROCESSING">Processing</option>
+                            <option value="COMPLETED">Completed</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" id="updatestatus-btn">Update Status</button>
+                </form>
+            </div>
+        </div>
+
 
         <!-- Order Delete Modal -->
         <div id="deleteOrderModal" class="modal">
