@@ -5,11 +5,11 @@ Feature: The Orders service back-end
 
     Background:
         Given the following orders
-            | id    | customer_id | shipping_address      | created_at                 | status    | items |
-            | 00000 | 00111       | 725 Broadway NY 10003 | 2024-08-07 02:42:07.086311 | CREATED   | []    |
-            | 00001 | 00222       | 726 Broadway NY 10003 | 2024-07-05 02:42:07.086311 | PROCESSING| []    |
-            | 00002 | 00333       | 727 Broadway NY 10003 | 2024-08-02 02:42:07.086311 | COMPLETED | []    |
-            | 00003 | 00444       | 728 Broadway NY 10003 | 2024-08-01 02:42:07.086311 | CREATED   | []    |
+            | id    | customer_id | shipping_address      | created_at                 | status     | items |
+            | 00000 | 00111       | 725 Broadway NY 10003 | 2024-08-07 02:42:07.086311 | CREATED    | []    |
+            | 00001 | 00222       | 726 Broadway NY 10003 | 2024-07-05 02:42:07.086311 | PROCESSING | []    |
+            | 00002 | 00333       | 727 Broadway NY 10003 | 2024-08-02 02:42:07.086311 | COMPLETED  | []    |
+            | 00003 | 00444       | 728 Broadway NY 10003 | 2024-08-01 02:42:07.086311 | CREATED    | []    |
         And the following items
             | id | order_id | product_id | price | product_description | quantity |
             | 0  | 0        | 0          | 23.4  | Glucose             | 2        |
@@ -108,3 +108,11 @@ Feature: The Orders service back-end
         And I select "Completed" in the "New Order Status" dropdown
         And I press the "updatestatus" button
         Then I should see the message "Success"
+
+    Scenario: Delete an Order
+        When I visit the "Home Page"
+        And I press the "deleteOrder" button
+        And I set the "order ID" to existing order id
+        And I press the "DeleteCurrOrder" button
+        And I press the "closedeleteOrderModal" button
+        Then I should see "Deleted Successfully (204)" in the "Status" span
