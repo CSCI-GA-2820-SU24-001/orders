@@ -471,7 +471,7 @@ $(document).ready(function () {
             const order_id_dup = values[4];
             const shipping_address = values[5];
             const status = values[6];
-
+    
             $.ajax({
                 url: `/orders/${order_id}/items`,
                 type: 'GET',
@@ -564,9 +564,8 @@ $(document).ready(function () {
             const created_at = values[0];
             const customer_id = values[1];
             const order_id = values[2];
-            const items = values[3];
-            const shipping_address = values[4];
-            const status = values[5];
+            const shipping_address = values[5];
+            const status = values[6];
 
             $.ajax({
                 url: `/orders/${order_id}/items`,
