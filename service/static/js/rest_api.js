@@ -463,9 +463,12 @@ $(document).ready(function () {
         data.forEach(item => {
             const row = $('<tr>');
             const values = Object.values(item);
+            console.log(values);
             const created_at = values[0];
             const customer_id = values[1];
             const order_id = values[2];
+            const items = values[3];
+            const order_id_dup = values[4];
             const shipping_address = values[5];
             const status = values[6];
     
@@ -541,7 +544,8 @@ $(document).ready(function () {
                     flash_message("Success");
                 } else {
                     flash_message("404");
-                }            },
+                }
+            },
             error: function (error) {
                 console.log('Error fetching data', error);
                 flash_message("Error fetching data");
@@ -606,21 +610,30 @@ $(document).ready(function () {
 
 var modal = document.getElementById("orderModal");
 var updatemodal = document.getElementById("updateorderModal");
+var deletemodal = document.getElementById("deleteOrderModal");
+
 
 
 var btn = document.getElementById("createorder-btn");
 var btn_update = document.getElementById("updateorder-btn");
+var btn_delete = document.getElementById("deleteorder-btn");
+
 
 var close_update = document.getElementById("updatecloseordermodal-btn")
 
 
 var span = document.getElementsByClassName("close")[0];
 
+var closeDelete = document.getElementById("closedeleteordermodal-btn");
+var close_create = document.getElementById("closeordermodal-btn");
+
+
+
 btn.onclick = function () {
     modal.style.display = "block";
 }
 
-span.onclick = function () {
+close_create.onclick = function () {
     modal.style.display = "none";
 }
 
@@ -635,6 +648,10 @@ btn_update.onclick = function () {
     updatemodal.style.display = "block";
 }
 
+btn_delete.onclick = function () {
+    deletemodal.style.display = "block";
+}
+
 // window.onclick = function (event) {
 //     if (event.target == modal) {
 //         updatemodal.style.display = "none";
@@ -645,6 +662,9 @@ close_update.onclick = function () {
     updatemodal.style.display = "none";
 }
 
+closeDelete.onclick = function () {
+    deletemodal.style.display = "none";
+}
 // UPDATE ORDER
 
 
@@ -890,6 +910,56 @@ document.getElementById("updateorderForm").onsubmit = function (event) {
             console.log(res);
             console.log(xhr.status);
             $("#orders_status").text(xhr.status);
+        });
+
+        ajax.fail(function (res) {
+            flash_message_create(res.responseJSON.message)
+            console.log(res);
+        });
+    }
+}
+
+document.getElementById("orderIdForm").onsubmit = function (event) {
+    event.preventDefault();
+    var isValid = true;
+
+    // Validate Order Name
+    // var orderName = document.getElementById("orderName").value;
+    // if (!orderName) {
+    //     document.getElementById("orderNameError").style.display = "block";
+    //     isValid = false;
+    // } else {
+    //     document.getElementById("orderNameError").style.display = "none";
+    // }
+
+    // Validate Order ID
+    isValid = true;
+    var orderId = document.getElementById("orders_order_id").value;
+    if (!orderId) {
+        document.getElementById("orderIdsError").style.display = "block";
+        isValid = false;
+    } else {
+        document.getElementById("orderIdsError").style.display = "none";
+    }
+
+    // If all fields are valid, create JSON object
+    if (isValid) {
+        console.log(orderId);
+
+        let ajax = $.ajax({
+            type: "DELETE",
+            url: `/orders/${orderId}`,
+            contentType: "application/json",
+            data: '',
+        });
+
+        ajax.done(function (res, textStatus, xhr) {
+            flash_message_create(res)
+            console.log("RESULT: ");
+            console.log(res);
+            console.log(xhr.status);
+            if (xhr.status == "204")
+                $("#orders_status").text("Deleted Successfully (204)");
         });
 
         ajax.fail(function (res) {

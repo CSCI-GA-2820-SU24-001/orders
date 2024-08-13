@@ -96,5 +96,3 @@ Feature: The Orders service back-end
         And I should not see "222" in the results
         And I should not see "333" in the results
         And I should not see "444" in the results
-
-
