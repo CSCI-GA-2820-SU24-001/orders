@@ -23,7 +23,7 @@ DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
 )
 
-BASE_URL = "/orders"
+BASE_URL = "/api/orders"
 
 
 ######################################################################
@@ -785,7 +785,7 @@ class TestOrderAPIService(TestCase):
 
     def test_unsupported_media_type(self):
         """Check if post request returns unsupported media type correctly"""
-        response = self.client.post("/orders", data="hello", content_type="text/html")
+        response = self.client.post(BASE_URL, data="hello", content_type="text/html")
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
     def test_delete_root_not_allowed(self):
