@@ -7,7 +7,7 @@ Feature: The Orders service back-end
         Given the following orders
             | id    | customer_id | shipping_address      | created_at                 | status    | items |
             | 00000 | 00111       | 725 Broadway NY 10003 | 2024-08-07 02:42:07.086311 | CREATED   | []    |
-            | 00001 | 00222       | 726 Broadway NY 10003 | 2024-07-05 02:42:07.086311 | CREATED   | []    |
+            | 00001 | 00222       | 726 Broadway NY 10003 | 2024-07-05 02:42:07.086311 | PROCESSING| []    |
             | 00002 | 00333       | 727 Broadway NY 10003 | 2024-08-02 02:42:07.086311 | COMPLETED | []    |
             | 00003 | 00444       | 728 Broadway NY 10003 | 2024-08-01 02:42:07.086311 | CREATED   | []    |
         And the following items
@@ -96,3 +96,15 @@ Feature: The Orders service back-end
         And I should not see "222" in the results
         And I should not see "333" in the results
         And I should not see "444" in the results
+
+    Scenario: Action - Change order status
+        When I visit the "Home Page"
+        And I select "Processing" in the "Order Status" dropdown
+        Then I should see the message "Success"
+        And I should see "PROCESSING" in the results
+        When I copy the "Order ID" field
+        And I press the "changeorderstatus" button
+        And I paste the "ID update" field
+        And I select "Completed" in the "New Order Status" dropdown
+        And I press the "updatestatus" button
+        Then I should see the message "Success"

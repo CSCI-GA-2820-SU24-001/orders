@@ -445,8 +445,8 @@ $(document).ready(function () {
             url: queryUrl,
             type: 'GET',
             dataType: 'json',
-            success: function (response) {
-                fillTable(response);
+            success: function (res) {
+                fillTable(res);
                 flash_message("Success");
             },
             error: function (error) {
@@ -538,17 +538,17 @@ $(document).ready(function () {
             url: queryUrl,
             type: 'GET',
             dataType: 'json',
-            success: function (response) {
-                if (response && response.length > 0) {
-                    fillTable(response);
+            success: function (res) {
+                if (res.length > 0) {
+                    fillTable(res);
                     flash_message("Success");
                 } else {
                     flash_message("404");
                 }
             },
-            error: function (error) {
+            error: function (res) {
                 console.log('Error fetching data', error);
-                flash_message("Error fetching data");
+                flash_message(res.responseJSON.message);
             }
         });
     }
@@ -605,6 +605,62 @@ $(document).ready(function () {
             customerIdModal.style.display = "none";
         }
     });
+});
+
+$(document).ready(function () {
+
+    var modal = document.getElementById("updateOrderStatusModal");
+    var btn = document.getElementById("changeorderstatus-btn");
+    var span = document.getElementById("closeUpdateOrderStatusModal-btn");
+
+    btn.onclick = function () {
+        modal.style.display = "block";
+    }
+
+    span.onclick = function () {
+        modal.style.display = "none";
+    }
+
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    $("#updateOrderStatusForm").submit(function (event) {
+        event.preventDefault();
+        const orderId = $("#orders_id_update").val();
+        const newStatus = $("#new_order_status").val();
+
+        if (!orderId) {
+            flash_message("Order ID is required");
+            return;
+        }
+
+        const data = {
+            "status": newStatus
+        };
+
+        $.ajax({
+            type: "PUT",
+            url: `/orders/${orderId}/status`,
+            contentType: "application/json",
+            data: JSON.stringify(data),
+            success: function (res) {
+                flash_message("Success");
+                modal.style.display = "none";
+            },
+            error: function (res) {
+                flash_message(res.responseJSON.message);
+            }
+        });
+    });
+
+    function flash_message(message) {
+        $("#orders_status").empty();
+        $("#orders_status").append(message);
+    }
+
 });
 
 
