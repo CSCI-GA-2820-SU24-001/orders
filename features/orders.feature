@@ -48,6 +48,14 @@ Feature: The Orders service back-end
         And I press the "viewallitems" button
         Then I should see "Glucose" in the item results
         And I should see "Candy" in the item results
+    Scenario: Read an Order
+        When I visit the "Home Page"
+        And I set the "Order ID" to "00000"
+        And I press the "readOrder" button
+        Then I should see "725 Broadway NY 10003" in the "Shipping Address" field
+        And I should see "00000" in the "Customer ID" field
+        And I should see "CREATED" in the "Status" field
+        And I should see "Product ID: 0, Description: Glucose, Quantity: 2, Price: 23.4" in the "Items" field
 
 # When I copy the "Id" field
 # And I press the "Clear" button
