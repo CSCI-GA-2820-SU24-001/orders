@@ -314,6 +314,14 @@ class OrderCollection(Resource):
 @api.route("/orders/<int:order_id>")
 @api.param("order_id", "The Order identifier")
 class OrderResource(Resource):
+    """
+    OrderResource class
+
+    Allows the manipulation of a single Order
+    GET /orders/{order_id} - Returns an Order with the id
+    PUT /orders/{order_id} - Update an Order with the id
+    DELETE /orders/{order_id} -  Deletes an Order with the id
+    """
 
     @api.doc("get_order")
     @api.marshal_with(order_model)
@@ -423,6 +431,14 @@ class OrderStatusResource(Resource):
 @api.param("order_id", "The Order identifier")
 @api.param("item_id", "The Item identifier")
 class ItemResource(Resource):
+    """
+    ItemResource class
+
+    Allows the manipulation of a single Order
+    GET /orders/{order_id}/items/{item_id} - Returns an Item with the id
+    PUT /orders/{order_id}/items/{item_id} - Update an Item with the id
+    DELETE /orders/{order_id}/items/{item_id} -  Deletes an Item with the id
+    """
 
     @api.doc("get_item")
     @api.marshal_with(item_model)
@@ -503,8 +519,8 @@ class ItemCollection(Resource):
     @api.response(404, "Order not found")
     def get(self, order_id):
         """Returns a list of all the Items in an Order"""
-        order = Order.query.filter_by(id=order_id).first()
-        #      if order is None:
+        # order = Order.query.filter_by(id=order_id).first()
+        #     if order is None:
         #         abort(status.HTTP_404_NOT_FOUND, "Order not found")
 
         query = Item.query.filter_by(order_id=order_id)
