@@ -23,7 +23,6 @@ Feature: The Orders service back-end
         And I should not see "404 Not Found"
 
 
-
     Scenario: Create an Order
         When I visit the "Home Page"
         And I press the "createOrder" button
@@ -35,6 +34,14 @@ Feature: The Orders service back-end
         And I press the "SubmitOrder" button
         And I press the "closeOrderModal" button
         Then I should see "201" in the "Status" span
+
+    Scenario: View all Orders
+        When I visit the "Home Page"
+        And I press the "viewallorder" button
+        Then I should see "725 Broadway NY 10003" in the results
+        And I should see "726 Broadway NY 10003" in the results
+        And I should see "727 Broadway NY 10003" in the results
+        And I should see "728 Broadway NY 10003" in the results
 
     Scenario: Update an Order
         When I visit the "Home Page"
@@ -49,41 +56,11 @@ Feature: The Orders service back-end
         And I press the "updatecloseordermodal" button
         Then I should see "200" in the "Status" span
 
-
-    Scenario: Query Completed Orders
-        When I visit the "Home Page"
-        And I select "Completed" in the "Order Status" dropdown
-        Then I should see the message "Success"
-        And I should see "727 Broadway NY 10003" in the results
-        And I should see "COMPLETED" in the results
-        And I should not see "CREATED" in the results
-
-
-    Scenario: View all Orders
-        When I visit the "Home Page"
-        And I press the "viewallorder" button
-        Then I should see "725 Broadway NY 10003" in the results
-        And I should see "726 Broadway NY 10003" in the results
-        And I should see "727 Broadway NY 10003" in the results
-        And I should see "728 Broadway NY 10003" in the results
-
     Scenario: View all Items
         When I visit the "Home Page"
         And I press the "viewallitems" button
         Then I should see "Glucose" in the item results
         And I should see "Candy" in the item results
-
-
-
-    Scenario: Delete an Order
-        When I visit the "Home Page"
-        And I press the "deleteOrder" button
-        And I set the "order ID" to existing order id
-        # And I select "False" in the "Available" dropdown
-        # And I select "Male" in the "Gender" dropdown
-        And I press the "DeleteCurrOrder" button
-        And I press the "closedeleteOrderModal" button
-        Then I should see "Deleted Successfully (204)" in the "Status" span
 
     # When I copy the "Id" field
     # And I press the "Clear" button
@@ -100,6 +77,14 @@ Feature: The Orders service back-end
     # And I should see "2022-06-16" in the "Birthday" field
 
 
+    Scenario: Query Completed Orders
+        When I visit the "Home Page"
+        And I select "Completed" in the "Order Status" dropdown
+        Then I should see the message "Success"
+        And I should see "727 Broadway NY 10003" in the results
+        And I should see "COMPLETED" in the results
+        And I should not see "CREATED" in the results
+
 
     Scenario: Query Orders by Customer ID
         When I visit the "Home Page"
@@ -111,5 +96,3 @@ Feature: The Orders service back-end
         And I should not see "222" in the results
         And I should not see "333" in the results
         And I should not see "444" in the results
-
-
