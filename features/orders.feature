@@ -8,8 +8,8 @@ Feature: The Orders service back-end
             | id    | customer_id | shipping_address      | created_at                 | status    | items |
             | 00000 | 00111       | 725 Broadway NY 10003 | 2024-08-07 02:42:07.086311 | CREATED   | []    |
             | 00001 | 00222       | 726 Broadway NY 10003 | 2024-07-05 02:42:07.086311 | CREATED   | []    |
-            | 00002 | 00333       | 727 Broadway NY 10003 | 2024-08-02 02:42:07.086311 | CREATED   | []    |
-            | 00003 | 00444       | 728 Broadway NY 10003 | 2024-08-01 02:42:07.086311 | COMPLETED | []    |
+            | 00002 | 00333       | 727 Broadway NY 10003 | 2024-08-02 02:42:07.086311 | COMPLETED | []    |
+            | 00003 | 00444       | 728 Broadway NY 10003 | 2024-08-01 02:42:07.086311 | CREATED   | []    |
         And the following items
             | id | order_id | product_id | price | product_description | quantity |
             | 0  | 0        | 0          | 23.4  | Glucose             | 2        |
@@ -21,6 +21,7 @@ Feature: The Orders service back-end
         When I visit the "Home Page"
         Then I should see "Order API" in the title
         And I should not see "404 Not Found"
+
 
 
     Scenario: Create an Order
@@ -35,14 +36,6 @@ Feature: The Orders service back-end
         And I press the "closeOrderModal" button
         Then I should see "201" in the "Status" span
 
-    Scenario: View all Orders
-        When I visit the "Home Page"
-        And I press the "viewallorder" button
-        Then I should see "725 Broadway NY 10003" in the results
-        And I should see "726 Broadway NY 10003" in the results
-        And I should see "727 Broadway NY 10003" in the results
-        And I should see "728 Broadway NY 10003" in the results
-
     Scenario: Update an Order
         When I visit the "Home Page"
         And I press the "updateOrder" button
@@ -56,34 +49,56 @@ Feature: The Orders service back-end
         And I press the "updatecloseordermodal" button
         Then I should see "200" in the "Status" span
 
+
+    Scenario: Query Completed Orders
+        When I visit the "Home Page"
+        And I select "Completed" in the "Order Status" dropdown
+        Then I should see the message "Success"
+        And I should see "727 Broadway NY 10003" in the results
+        And I should see "COMPLETED" in the results
+        And I should not see "CREATED" in the results
+
+
+    Scenario: View all Orders
+        When I visit the "Home Page"
+        And I press the "viewallorder" button
+        Then I should see "725 Broadway NY 10003" in the results
+        And I should see "726 Broadway NY 10003" in the results
+        And I should see "727 Broadway NY 10003" in the results
+        And I should see "728 Broadway NY 10003" in the results
+
     Scenario: View all Items
         When I visit the "Home Page"
         And I press the "viewallitems" button
         Then I should see "Glucose" in the item results
         And I should see "Candy" in the item results
 
-# When I copy the "Id" field
-# And I press the "Clear" button
-# Then the "Id" field should be empty
-# And the "Name" field should be empty
-# And the "Category" field should be empty
-# When I paste the "Id" field
-# And I press the "Retrieve" button
-# Then I should see the message "Success"
-# And I should see "Happy" in the "Name" field
-# And I should see "Hippo" in the "Category" field
-# And I should see "False" in the "Available" dropdown
-# And I should see "Male" in the "Gender" dropdown
-# And I should see "2022-06-16" in the "Birthday" field
 
 
-    Scenario: Query Completed Orders
+    Scenario: Delete an Order
         When I visit the "Home Page"
-        And I select "Completed" in the "Order Status" dropdown
-        Then I should see the message "Success"
-        And I should see "728 Broadway NY 10003" in the results
-        And I should see "COMPLETED" in the results
-        And I should not see "CREATED" in the results
+        And I press the "deleteOrder" button
+        And I set the "order ID" to existing order id
+        # And I select "False" in the "Available" dropdown
+        # And I select "Male" in the "Gender" dropdown
+        And I press the "DeleteCurrOrder" button
+        And I press the "closedeleteOrderModal" button
+        Then I should see "Deleted Successfully (204)" in the "Status" span
+
+    # When I copy the "Id" field
+    # And I press the "Clear" button
+    # Then the "Id" field should be empty
+    # And the "Name" field should be empty
+    # And the "Category" field should be empty
+    # When I paste the "Id" field
+    # And I press the "Retrieve" button
+    # Then I should see the message "Success"
+    # And I should see "Happy" in the "Name" field
+    # And I should see "Hippo" in the "Category" field
+    # And I should see "False" in the "Available" dropdown
+    # And I should see "Male" in the "Gender" dropdown
+    # And I should see "2022-06-16" in the "Birthday" field
+
 
 
     Scenario: Query Orders by Customer ID

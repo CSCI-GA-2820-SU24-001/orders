@@ -107,9 +107,11 @@
 
         <button id="viewallorder-btn">View all orders</button>
         <button id="viewallitems-btn">View all items</button>
+        <button id="deleteorder-btn">Delete an order</button>
+
 
         <br>
-        
+
         <button id="searchbycustomerid-btn">Search by Customer ID</button>
 
         <br>
@@ -134,15 +136,33 @@
                 <form id="customerIdForm">
                     <div class="form-group">
                         <label for="customerId">Customer ID:</label>
-                        <input type="text" id="orders_customer_id" name="customerId" class="form-control" placeholder="Enter Customer ID" required>
+                        <input type="text" id="orders_customer_id" name="customerId" class="form-control"
+                            placeholder="Enter Customer ID" required>
                     </div>
                     <button type="submit" id="searchcustomerid-btn">Search</button>
                 </form>
             </div>
         </div>
 
+        <!-- Order Delete Modal -->
+        <div id="deleteOrderModal" class="modal">
+            <div class="modal-content">
+                <span class="close" id="closedeleteordermodal-btn">&times;</span>
+                <form id="orderIdForm">
+                    <div class="form-group">
+                        <label for="orderId">Order ID:</label>
+                        <input type="text" id="orders_order_id" name="deleteOrderId" class="form-control"
+                            placeholder="Enter Order ID" required>
+                        <span class="error" id="orderIdsError">Order ID is required</span>
 
-        <!-- The Modal -->
+                    </div>
+                    <button type="submit" id="deletecurrorder-btn">Delete</button>
+                </form>
+            </div>
+        </div>
+
+
+        <!-- Create Order Modal -->
         <div id="orderModal" class="modal">
 
             <!-- Modal content -->
