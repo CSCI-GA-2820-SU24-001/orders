@@ -11,6 +11,33 @@
     background-color: rgba(0, 0, 0, 0.4);
 }
 
+.button_orders {
+    background-color: #007BFF;
+    /* Primary blue color */
+    color: white;
+    /* White text */
+    border: none;
+    /* Remove default border */
+    padding: 12px 24px;
+    /* Padding for the button */
+    text-align: center;
+    /* Center the text */
+    text-decoration: none;
+    /* Remove underline from text */
+    display: inline-block;
+    /* Allow setting margins and positioning */
+    font-size: 14px;
+    /* Font size */
+    font-weight: 500;
+    /* Slightly bold text */
+    border-radius: 4px;
+    /* Slightly rounded corners */
+    cursor: pointer;
+    /* Pointer cursor on hover */
+    margin: 10px;
+    /* Margin around the button */
+}
+
 .modal-content {
     background-color: #fefefe;
     margin: 15% auto;

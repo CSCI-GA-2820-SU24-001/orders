@@ -4,7 +4,6 @@ TestYourResourceModel API Service Test Suite
 
 import os
 import random
-from datetime import datetime
 import logging
 from unittest import TestCase
 from urllib.parse import quote_plus
@@ -23,7 +22,7 @@ DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
 )
 
-BASE_URL = "/orders"
+BASE_URL = "/api/orders"
 
 
 ######################################################################
@@ -139,7 +138,7 @@ class TestOrderAPIService(TestCase):
         self.assertEqual(len(data), cust_count)
         # check the data just to be sure
         for order in data:
-            self.assertEqual(order["customer_id"], str(test_customer_id))
+            self.assertEqual(str(order["customer_id"]), str(test_customer_id))
 
     def test_query_by_status(self):
         """It should Query Orders by status"""
@@ -167,7 +166,6 @@ class TestOrderAPIService(TestCase):
             "items": [],
             "customer_id": random.randint(0, 10000),
             "shipping_address": "726 Broadway, NY 10003",
-            "created_at": "Mon, 22 Jan 2024 17:00:52 GMT",
             "status": "CREATED",
         }
 
@@ -213,13 +211,77 @@ class TestOrderAPIService(TestCase):
             "Item description does not match",
         )
 
+    def test_create_sad_path_no_customer_id(self):
+        """
+        It should call the method to create an order and return a 400 bad request code due to missing customer id
+        """
+        request = {
+            "items": [],
+            "shipping_address": "726 Broadway, NY 10003",
+            "status": "CREATED",
+        }
+
+        request["items"].append(
+            {
+                "product_id": 1,
+                "order_id": 0,
+                "quantity": 2,
+                "price": 23.4,
+                "product_description": "Glucose",
+            }
+        )
+
+        logger.info("***************** SENT DATA *******************")
+
+        logger.info(request["items"])
+        response = self.client.post(
+            BASE_URL, json=request, content_type="application/json"
+        )
+        order_data = response.get_json()
+
+        logger.info("***************** RECEIVED DATA *******************")
+        logger.info(order_data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_sad_path_no_shipping_address(self):
+        """
+        It should call the method to create an order and return a 400 bad request code due to missing shipping address
+        """
+        request = {
+            "items": [],
+            "customer_id": random.randint(0, 10000),
+            "created_at": "Mon, 22 Jan 2024 17:00:52 GMT",
+            "status": "CREATED",
+        }
+
+        request["items"].append(
+            {
+                "product_id": 1,
+                "order_id": 0,
+                "quantity": 2,
+                "price": 23.4,
+                "product_description": "Glucose",
+            }
+        )
+
+        logger.info("***************** SENT DATA *******************")
+
+        logger.info(request["items"])
+        response = self.client.post(
+            BASE_URL, json=request, content_type="application/json"
+        )
+        order_data = response.get_json()
+
+        logger.info("***************** RECEIVED DATA *******************")
+        logger.info(order_data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_view_order(self):
         """It should view an order"""
         customer_id = random.randint(0, 10000)
         order1 = Order(
             customer_id=customer_id,
             shipping_address="726 Broadway, NY 10003",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order1.create()
@@ -253,7 +315,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="726 Broadway, NY 10003",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()
@@ -322,7 +383,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="726 Broadway, NY 10003",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()
@@ -349,7 +409,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="726 Broadway, NY 10003",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()
@@ -377,7 +436,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="726 Broadway, NY 10003",
-            created_at=datetime.now(),
             status="PROCESSING",
         )
         order.create()
@@ -402,7 +460,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="726 Broadway, NY 10003",
-            created_at=datetime.now(),
             status="COMPLETED",
         )
         order.create()
@@ -448,7 +505,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="1428 Elm St",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()
@@ -468,7 +524,6 @@ class TestOrderAPIService(TestCase):
         order1 = Order(
             customer_id=customer_id,
             shipping_address="726 Broadway, NY 10003",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order1.create()
@@ -511,7 +566,6 @@ class TestOrderAPIService(TestCase):
         order1 = Order(
             customer_id=customer_id,
             shipping_address="726 Broadway, NY 10003",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order1.create()
@@ -548,7 +602,6 @@ class TestOrderAPIService(TestCase):
         order1 = Order(
             customer_id=customer_id,
             shipping_address="726 Broadway, NY 10003",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order1.create()
@@ -586,7 +639,6 @@ class TestOrderAPIService(TestCase):
         order1 = Order(
             customer_id=customer_id,
             shipping_address="726 Broadway, NY 10003",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order1.create()
@@ -599,13 +651,29 @@ class TestOrderAPIService(TestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_add_item_sad_path_no_data(self):
+        """Test adding a new item with no item data."""
+        customer_id = random.randint(0, 10000)
+        order1 = Order(
+            customer_id=customer_id,
+            shipping_address="726 Broadway, NY 10003",
+            status="CREATED",
+        )
+        order1.create()
+
+        # Perform POST request with invalid JSON data
+        response = self.client.post(
+            f"{BASE_URL}/{order1.id}/items",
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_add_item_sad_path_missing_fields(self):
         """Test adding a new item with missing required fields."""
         customer_id = random.randint(0, 10000)
         order1 = Order(
             customer_id=customer_id,
             shipping_address="726 Broadway, NY 10003",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order1.create()
@@ -648,7 +716,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="1428 Elm St",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()
@@ -716,7 +783,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="1428 Elm St",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()
@@ -749,7 +815,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="1428 Elm St",
-            created_at=datetime.now(),
             # non CREATED
             status="PROCESSING",
         )
@@ -785,12 +850,14 @@ class TestOrderAPIService(TestCase):
 
     def test_unsupported_media_type(self):
         """Check if post request returns unsupported media type correctly"""
-        response = self.client.post("/orders", data="hello", content_type="text/html")
+        response = self.client.post(
+            "/api/orders/", data="hello", content_type="text/html"
+        )
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
     def test_delete_root_not_allowed(self):
         """Check if root can be deleted"""
-        response = self.client.delete("/")
+        response = self.client.delete("/api/")
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_list_items_in_order(self):
@@ -800,7 +867,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="726 Broadway, NY 10003",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()
@@ -824,7 +890,7 @@ class TestOrderAPIService(TestCase):
         item2.create()
 
         response = self.client.get(
-            f"/orders/{order.id}/items", content_type="application/json"
+            f"/api/orders/{order.id}/items", content_type="application/json"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -832,16 +898,16 @@ class TestOrderAPIService(TestCase):
         self.assertIsInstance(items_list, list)
         self.assertEqual(len(items_list), 2)
 
-        self.assertEqual(items_list[0]["product_id"], item1.product_id)
-        self.assertEqual(items_list[0]["quantity"], item1.quantity)
-        self.assertEqual(items_list[0]["price"], item1.price)
+        self.assertEqual(int(items_list[0]["product_id"]), int(item1.product_id))
+        self.assertEqual(int(items_list[0]["quantity"]), int(item1.quantity))
+        self.assertEqual(int(items_list[0]["price"]), int(item1.price))
         self.assertEqual(
             items_list[0]["product_description"], item1.product_description
         )
 
-        self.assertEqual(items_list[1]["product_id"], item2.product_id)
-        self.assertEqual(items_list[1]["quantity"], item2.quantity)
-        self.assertEqual(items_list[1]["price"], item2.price)
+        self.assertEqual(int(items_list[1]["product_id"]), int(item2.product_id))
+        self.assertEqual(int(items_list[1]["quantity"]), int(item2.quantity))
+        self.assertEqual(int(items_list[1]["price"]), int(item2.price))
         self.assertEqual(
             items_list[1]["product_description"], item2.product_description
         )
@@ -851,7 +917,7 @@ class TestOrderAPIService(TestCase):
         non_existent_order_id = random.randint(10001, 20000)
 
         response = self.client.get(
-            f"/orders/{non_existent_order_id}/items",
+            f"/api/orders/{non_existent_order_id}/items",
             content_type="application/json",
         )
 
@@ -864,7 +930,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="1428 Elm St",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()
@@ -891,7 +956,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="1428 Elm St",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()
@@ -940,7 +1004,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="1428 Elm St",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()
@@ -967,7 +1030,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=random.randint(0, 10000),
             shipping_address="1428 Elm St",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()
@@ -1012,7 +1074,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=random.randint(0, 10000),
             shipping_address="1428 Elm St",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()
@@ -1056,7 +1117,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=random.randint(0, 10000),
             shipping_address="1428 Elm St",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()

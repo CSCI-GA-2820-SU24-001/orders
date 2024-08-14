@@ -102,6 +102,7 @@
     </div> 
     </div> end Form -->
 
+
     <div class="button-group" style="margin-bottom: 20px;">
         <button id="createorder-btn">Create an order</button>
         <button id="updateorder-btn">Update an order</button>
@@ -114,18 +115,23 @@
        
 
 
+        <h3>Order Operations:</h3>
 
-        <br>
+        <button id="createorder-btn" class="button_orders">Create an order</button>
+        <button id="updateorder-btn" class="button_orders">Update an order</button>
 
-        <button id="changeorderstatus-btn">Change Order Status</button>
-        <button id="searchbycustomerid-btn">Search by Customer ID</button>
 
-        <br>
+        <button id="viewallorder-btn" class="button_orders">View all orders</button>
+        <button id="deleteorder-btn" class="button_orders">Delete an order</button>
 
+        <button id="changeorderstatus-btn" class="button_orders">Change Order Status</button>
+        <button id="searchbycustomerid-btn" class="button_orders">Search by Customer ID</button>
+        <br />
+        <hr />
         <!-- Status Dropdown -->
         <div class="form-group">
             <div class="form-group">
-                <label for="order_status">Order Status:</label>
+                <label for="order_status" style="font-size: 16px;">Search/Filter by Order Status:</label>
                 <select class="form-control" id="order_status" style="width: auto;">
                     <option disabled selected>Select</option>
                     <option value="CREATED">Created</option>
@@ -134,6 +140,9 @@
                 </select>
             </div>
         </div>
+        <hr />
+        <button id="viewallitems-btn" class="button_orders">View all items</button>
+
 
         <!-- Customer ID Query Search -->
         <div id="customerIdModal" class="modal">
@@ -157,7 +166,8 @@
                 <form id="updateOrderStatusForm">
                     <div class="form-group">
                         <label for="orders_id_update">Order ID:</label>
-                        <input type="text" id="orders_id_update" class="form-control" placeholder="Enter Order ID" required>
+                        <input type="text" id="orders_id_update" class="form-control" placeholder="Enter Order ID"
+                            required>
                     </div>
 
                     <div class="form-group">
