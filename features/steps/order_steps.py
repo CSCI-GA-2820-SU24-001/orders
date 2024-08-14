@@ -39,7 +39,7 @@ def step_impl(context):
     """Delete all Orders and load new ones"""
 
     # Get a list all of the orders
-    rest_endpoint = f"{context.base_url}/orders"
+    rest_endpoint = f"{context.base_url}/api/orders"
     context.resp = requests.get(rest_endpoint, timeout=WAIT_TIMEOUT)
     expect(context.resp.status_code).equal_to(HTTP_200_OK)
     # and delete them one by one

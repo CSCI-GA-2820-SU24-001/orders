@@ -57,7 +57,7 @@ $(function () {
 
         let ajax = $.ajax({
             type: "POST",
-            url: "/orders",
+            url: "/api/orders/",
             contentType: "application/json",
             data: JSON.stringify(data),
         });
@@ -98,7 +98,7 @@ $(function () {
 
         let ajax = $.ajax({
             type: "PUT",
-            url: `/orders/${order_id}`,
+            url: `/api/orders/${order_id}`,
             contentType: "application/json",
             data: JSON.stringify(data)
         })
@@ -126,7 +126,7 @@ $(function () {
 
         let ajax = $.ajax({
             type: "GET",
-            url: `/orders/${order_id}`,
+            url: `/api/orders/${order_id}`,
             contentType: "application/json",
             data: ''
         })
@@ -156,7 +156,7 @@ $(function () {
 
         let ajax = $.ajax({
             type: "DELETE",
-            url: `/orders/${order_id}`,
+            url: `/api/orders/${order_id}`,
             contentType: "application/json",
             data: '',
         })
@@ -261,7 +261,7 @@ $(function () {
 
 
 $(document).ready(function () {
-    const url = "/orders"
+    const url = "/api/orders/"
 
     // Function to fetch JSON data
     function fetchJSONData() {
@@ -297,18 +297,20 @@ $(document).ready(function () {
             const row = $('<tr>');
             // Only add the first and second properties
             const values = Object.values(item);
+            console.log("THESE VALUES");
+            console.log(values);
             // Assuming the structure is known, you can directly access the values you want to keep
-            const created_at = values[0];
-            const customer_id = values[1];
-            const order_id = values[2];
-            const items = values[3];
-            const order_id_dup = values[4];
+            var created_at = new Date(values[4] * 1000);
+            const customer_id = values[2];
+            const order_id = values[0];
+            const items = values[6];
+            const order_id_dup = values[1];
 
-            const shipping_address = values[5];
-            const status = values[6];
+            const shipping_address = values[3];
+            const status = values[5];
 
             $.ajax({
-                url: "/orders/" + order_id + "/items",
+                url: `/api/orders/${order_id}/items`,
                 type: 'GET',
                 dataType: 'json',
                 success: function (response) {
@@ -352,7 +354,7 @@ $(document).ready(function () {
 
 // FUNCTION TO FILL ITEM TABLE
 $(document).ready(function () {
-    const url = "/orders"
+    const url = "/api/orders/"
 
     // Function to fetch JSON data
     function fetchJSONDataItems() {
@@ -383,15 +385,17 @@ $(document).ready(function () {
         // Clear any existing content
         tbody.empty();
         var done_prods = []
+        console.log(data)
 
         // Create table rows
         data.forEach(item => {
             const row = $('<tr>');
             const values = Object.values(item);
-            const order_id = values[2];
-
+            const order_id = values[0];
+            console.log("Trying to get items");
+            console.log(values);
             $.ajax({
-                url: "/orders/" + order_id + "/items",
+                url: `/api/orders/${order_id}/items`,
                 type: 'GET',
                 dataType: 'json',
                 success: function (response) {
@@ -436,7 +440,7 @@ $(document).ready(function () {
 });
 
 $(document).ready(function () {
-    const url = "/orders";
+    const url = "/api/orders/";
 
     function fetchJSONDataByStatus(status) {
         const queryUrl = `${url}?status_name=${status}`;
@@ -463,17 +467,18 @@ $(document).ready(function () {
         data.forEach(item => {
             const row = $('<tr>');
             const values = Object.values(item);
+            console.log("DROPDOWN LOG");
             console.log(values);
-            const created_at = values[0];
-            const customer_id = values[1];
-            const order_id = values[2];
-            const items = values[3];
-            const order_id_dup = values[4];
-            const shipping_address = values[5];
-            const status = values[6];
-    
+            const created_at = new Date(values[4] * 1000);
+            const customer_id = values[2];
+            const order_id = values[0];
+            const items = values[6];
+            const order_id_dup = values[1];
+            const shipping_address = values[3];
+            const status = values[5];
+
             $.ajax({
-                url: `/orders/${order_id}/items`,
+                url: `/api/orders/${order_id}/items`,
                 type: 'GET',
                 dataType: 'json',
                 success: function (response) {
@@ -511,7 +516,7 @@ $(document).ready(function () {
 });
 
 $(document).ready(function () {
-    const url = "/orders";
+    const url = "/api/orders/";
 
     var customerIdModal = document.getElementById("customerIdModal");
     var searchByCustomerIdBtn = document.getElementById("searchbycustomerid-btn");
@@ -561,14 +566,16 @@ $(document).ready(function () {
         data.forEach(item => {
             const row = $('<tr>');
             const values = Object.values(item);
-            const created_at = values[0];
-            const customer_id = values[1];
-            const order_id = values[2];
-            const shipping_address = values[5];
-            const status = values[6];
+            console.log("SEARCH VALUES");
+            console.log(values);
+            const created_at = new Date(values[4] * 1000);
+            const customer_id = values[2];
+            const order_id = values[1];
+            const shipping_address = values[3];
+            const status = values[5];
 
             $.ajax({
-                url: `/orders/${order_id}/items`,
+                url: `/api/orders/${order_id}/items`,
                 type: 'GET',
                 dataType: 'json',
                 success: function (response) {
@@ -643,7 +650,7 @@ $(document).ready(function () {
 
         $.ajax({
             type: "PUT",
-            url: `/orders/${orderId}/status`,
+            url: `/api/orders/${orderId}/status`,
             contentType: "application/json",
             data: JSON.stringify(data),
             success: function (res) {
@@ -836,7 +843,7 @@ document.getElementById("orderForm").onsubmit = function (event) {
 
         let ajax = $.ajax({
             type: "POST",
-            url: "/orders",
+            url: "/api/orders/",
             contentType: "application/json",
             data: JSON.stringify(requestObject),
         });
@@ -955,7 +962,7 @@ document.getElementById("updateorderForm").onsubmit = function (event) {
 
         let ajax = $.ajax({
             type: "PUT",
-            url: `/orders/${orderID}`,
+            url: `/api/orders/${orderID}`,
             contentType: "application/json",
             data: JSON.stringify(requestObject),
         });
@@ -1004,7 +1011,7 @@ document.getElementById("orderIdForm").onsubmit = function (event) {
 
         let ajax = $.ajax({
             type: "DELETE",
-            url: `/orders/${orderId}`,
+            url: `/api/orders/${orderId}`,
             contentType: "application/json",
             data: '',
         });
