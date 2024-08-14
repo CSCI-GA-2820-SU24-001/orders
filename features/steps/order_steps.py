@@ -83,7 +83,8 @@ def step_impl(context):
             timeout=WAIT_TIMEOUT,
         )
         data = context.resp.json()
-        context.valid_order_id = data["order_id"]
+        print(data)
+        context.valid_order_id = data["id"]
         expect(context.resp.status_code).equal_to(HTTP_201_CREATED)
 
 

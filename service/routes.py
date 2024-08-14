@@ -468,7 +468,7 @@ class ItemCollection(Resource):
 ######################################################################
 @api.route("/orders/<int:order_id>/item/<int:item_id>")
 @api.param("order_id", "The ID of the order (integer)")
-@api.param("item_id", "The ID of the item in the order (integer)r")
+@api.param("item_id", "The ID of the item in the order (integer)")
 class ItemResource(Resource):
     """
     ItemResource
@@ -590,6 +590,7 @@ class OrderChangeStatus(Resource):
 
     @api.doc("change_order_status")
     @api.response(400, "Invalid status provided. Order status cannot be updated")
+    @api.expect(order_model)
     @api.marshal_with(order_model)
     def put(self, order_id):
         """CHANGE ORDER STATUS
@@ -601,7 +602,7 @@ class OrderChangeStatus(Resource):
             JSON: order with changed status
         """
         data = request.json
-        curr_order = Order.query.filter_by(id=order_id).first()
+        curr_order = Order.query.filter_by(id=int(order_id)).first()
 
         if not curr_order:
             abort(status.HTTP_404_NOT_FOUND, f"Order ID {order_id} not found")
