@@ -20,7 +20,6 @@ Orders Service
 This service implements a REST API that allows you to Create, Read, Update
 and Delete Orders
 """
-from datetime import datetime
 import logging
 from flask import jsonify, request, abort
 from flask import current_app as app  # Import Flask application
@@ -39,6 +38,13 @@ logger = logging.getLogger("flask.app")
 
 class DataValidationError(Exception):
     """Used for an data validation errors when deserializing"""
+
+
+# class TimestampDateFormat(fields.Raw):
+#     """Use to convert timestamp into readable date time for Flask-RestX"""
+
+#     def format(self, value):
+#         return datetime.fromtimestamp(value)
 
 
 @app.route("/health")
@@ -111,8 +117,8 @@ order_model = api.inherit(
         "id": fields.Integer(
             readOnly=True, description="The unique id assigned internally by service"
         ),
-        "created_at": fields.DateTime,
-        "updated_at": fields.DateTime,
+        "created_at": fields.Date(),
+        "updated_at": fields.Date(),
     },
 )
 
@@ -208,7 +214,7 @@ class OrderCollection(Resource):
         results = []
         for order in orders:
             res = order.serialize()
-            res["created_at"] = res["created_at"].timestamp()
+            # res["created_at"] = res["created_at"].timestamp()
             results.append(res)
             app.logger.info(res["id"])
         app.logger.info("Returning %d orders", len(results))
@@ -241,8 +247,6 @@ class OrderCollection(Resource):
         order_obj.customer_id = int(data["customer_id"])
         order_obj.shipping_address = data["shipping_address"]
         order_obj.status = OrderStatus[data["status"]]
-        order_obj.created_at = datetime.now()
-        data["created_at"] = datetime.now()
 
         order_obj.create()
 
@@ -264,8 +268,8 @@ class OrderCollection(Resource):
         logger.info("**************ACTUAL DATA************")
         logger.info(order_obj.items)
         message = order_obj.serialize()
-        message["created_at"] = message["created_at"].timestamp()
-        print(message)
+        # message["created_at"] = message["created_at"].timestamp()
+        # print(message)
         return (message, status.HTTP_201_CREATED)
 
 
@@ -293,7 +297,7 @@ class OrderResource(Resource):
         logger.info("**********ORDER DETAILS***********")
         logger.info(jsonify(curr_order.serialize()))
         message = curr_order.serialize()
-        message["created_at"] = message["created_at"].timestamp()
+        # message["created_at"] = message["created_at"].timestamp()
         return message, status.HTTP_200_OK
 
     @api.doc("update_order")
@@ -344,13 +348,12 @@ class OrderResource(Resource):
 
             curr_order.status = new_status_enum
 
-        curr_order.updated_at = datetime.now()
+        # curr_order.updated_at = datetime.now()
         curr_order.update()
 
         logger.info("**************UPDATED ORDER DATA************")
         logger.info(curr_order.serialize())
         message = curr_order.serialize()
-        message["created_at"] = message["created_at"].timestamp()
 
         return message, status.HTTP_200_OK
 
@@ -417,7 +420,7 @@ class ItemCollection(Resource):
         response_data = new_item.serialize()
 
         location_url = api.url_for(
-            GetItem, order_id=order.id, item_id=new_item.id, _external=True
+            ItemResource, order_id=order.id, item_id=new_item.id, _external=True
         )
 
         return (
@@ -430,10 +433,9 @@ class ItemCollection(Resource):
     @api.marshal_list_with(item_model)
     def get(self, order_id):
         """Returns the list of items in an order"""
-        order_id = int(order_id)
         logger.info("ORDER ID %d", order_id)
 
-        order = Order.query.filter_by(id=order_id).first()
+        order = Order.query.filter_by(id=int(order_id)).first()
         if order is None:
             abort(
                 status.HTTP_404_NOT_FOUND,
@@ -537,7 +539,7 @@ class ItemResource(Resource):
         if "price" in data:
             item.price = data["price"]
 
-        item.updated_at = datetime.now()
+        # item.updated_at = datetime.now()
         item.update()
 
         logger.info("**************UPDATED ITEM DATA************")
@@ -625,12 +627,10 @@ class OrderChangeStatus(Resource):
             )
 
         curr_order.status = new_status_enum
-        curr_order.updated_at = datetime.now()
         curr_order.update()
 
         logger.info("**************UPDATED ORDER STATUS************")
         logger.info(curr_order.serialize())
         message = curr_order.serialize()
-        message["created_at"] = message["created_at"].timestamp()
 
         return message, status.HTTP_200_OK

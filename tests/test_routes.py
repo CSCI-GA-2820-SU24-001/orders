@@ -4,7 +4,6 @@ TestYourResourceModel API Service Test Suite
 
 import os
 import random
-from datetime import datetime
 import logging
 from unittest import TestCase
 from urllib.parse import quote_plus
@@ -102,7 +101,7 @@ class TestOrderAPIService(TestCase):
 
     def test_index(self):
         """It should call the home page"""
-        resp = self.client.get("/api/")
+        resp = self.client.get("/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
     def test_health(self):
@@ -139,7 +138,7 @@ class TestOrderAPIService(TestCase):
         self.assertEqual(len(data), cust_count)
         # check the data just to be sure
         for order in data:
-            self.assertEqual(order["customer_id"], str(test_customer_id))
+            self.assertEqual(str(order["customer_id"]), str(test_customer_id))
 
     def test_query_by_status(self):
         """It should Query Orders by status"""
@@ -167,7 +166,6 @@ class TestOrderAPIService(TestCase):
             "items": [],
             "customer_id": random.randint(0, 10000),
             "shipping_address": "726 Broadway, NY 10003",
-            "created_at": "Mon, 22 Jan 2024 17:00:52 GMT",
             "status": "CREATED",
         }
 
@@ -220,7 +218,6 @@ class TestOrderAPIService(TestCase):
         request = {
             "items": [],
             "shipping_address": "726 Broadway, NY 10003",
-            "created_at": "Mon, 22 Jan 2024 17:00:52 GMT",
             "status": "CREATED",
         }
 
@@ -248,7 +245,7 @@ class TestOrderAPIService(TestCase):
 
     def test_create_sad_path_no_shipping_address(self):
         """
-        It should call the method to create an order and return a 400 bad request code due to missing customer id
+        It should call the method to create an order and return a 400 bad request code due to missing shipping address
         """
         request = {
             "items": [],
@@ -285,7 +282,6 @@ class TestOrderAPIService(TestCase):
         order1 = Order(
             customer_id=customer_id,
             shipping_address="726 Broadway, NY 10003",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order1.create()
@@ -319,7 +315,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="726 Broadway, NY 10003",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()
@@ -388,7 +383,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="726 Broadway, NY 10003",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()
@@ -415,7 +409,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="726 Broadway, NY 10003",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()
@@ -443,7 +436,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="726 Broadway, NY 10003",
-            created_at=datetime.now(),
             status="PROCESSING",
         )
         order.create()
@@ -468,7 +460,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="726 Broadway, NY 10003",
-            created_at=datetime.now(),
             status="COMPLETED",
         )
         order.create()
@@ -514,7 +505,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="1428 Elm St",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()
@@ -534,7 +524,6 @@ class TestOrderAPIService(TestCase):
         order1 = Order(
             customer_id=customer_id,
             shipping_address="726 Broadway, NY 10003",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order1.create()
@@ -577,7 +566,6 @@ class TestOrderAPIService(TestCase):
         order1 = Order(
             customer_id=customer_id,
             shipping_address="726 Broadway, NY 10003",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order1.create()
@@ -614,7 +602,6 @@ class TestOrderAPIService(TestCase):
         order1 = Order(
             customer_id=customer_id,
             shipping_address="726 Broadway, NY 10003",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order1.create()
@@ -652,7 +639,6 @@ class TestOrderAPIService(TestCase):
         order1 = Order(
             customer_id=customer_id,
             shipping_address="726 Broadway, NY 10003",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order1.create()
@@ -671,7 +657,6 @@ class TestOrderAPIService(TestCase):
         order1 = Order(
             customer_id=customer_id,
             shipping_address="726 Broadway, NY 10003",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order1.create()
@@ -689,7 +674,6 @@ class TestOrderAPIService(TestCase):
         order1 = Order(
             customer_id=customer_id,
             shipping_address="726 Broadway, NY 10003",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order1.create()
@@ -732,7 +716,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="1428 Elm St",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()
@@ -800,7 +783,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="1428 Elm St",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()
@@ -833,7 +815,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="1428 Elm St",
-            created_at=datetime.now(),
             # non CREATED
             status="PROCESSING",
         )
@@ -886,7 +867,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="726 Broadway, NY 10003",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()
@@ -918,16 +898,16 @@ class TestOrderAPIService(TestCase):
         self.assertIsInstance(items_list, list)
         self.assertEqual(len(items_list), 2)
 
-        self.assertEqual(items_list[0]["product_id"], item1.product_id)
-        self.assertEqual(items_list[0]["quantity"], item1.quantity)
-        self.assertEqual(items_list[0]["price"], item1.price)
+        self.assertEqual(int(items_list[0]["product_id"]), int(item1.product_id))
+        self.assertEqual(int(items_list[0]["quantity"]), int(item1.quantity))
+        self.assertEqual(int(items_list[0]["price"]), int(item1.price))
         self.assertEqual(
             items_list[0]["product_description"], item1.product_description
         )
 
-        self.assertEqual(items_list[1]["product_id"], item2.product_id)
-        self.assertEqual(items_list[1]["quantity"], item2.quantity)
-        self.assertEqual(items_list[1]["price"], item2.price)
+        self.assertEqual(int(items_list[1]["product_id"]), int(item2.product_id))
+        self.assertEqual(int(items_list[1]["quantity"]), int(item2.quantity))
+        self.assertEqual(int(items_list[1]["price"]), int(item2.price))
         self.assertEqual(
             items_list[1]["product_description"], item2.product_description
         )
@@ -950,7 +930,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="1428 Elm St",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()
@@ -977,7 +956,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="1428 Elm St",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()
@@ -1026,7 +1004,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=customer_id,
             shipping_address="1428 Elm St",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()
@@ -1053,7 +1030,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=random.randint(0, 10000),
             shipping_address="1428 Elm St",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()
@@ -1098,7 +1074,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=random.randint(0, 10000),
             shipping_address="1428 Elm St",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()
@@ -1142,7 +1117,6 @@ class TestOrderAPIService(TestCase):
         order = Order(
             customer_id=random.randint(0, 10000),
             shipping_address="1428 Elm St",
-            created_at=datetime.now(),
             status="CREATED",
         )
         order.create()

@@ -5,7 +5,7 @@ All of the models are stored in this module
 """
 
 import logging
-import datetime
+from datetime import date
 from enum import Enum
 from flask_sqlalchemy import SQLAlchemy
 
@@ -15,7 +15,7 @@ logger = logging.getLogger("flask.app")
 # Create the SQLAlchemy object to be initialized later in init_db()
 db = SQLAlchemy()
 
-DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+DATE_FORMAT = "%Y-%m-%d"
 
 
 class DataValidationError(Exception):
@@ -164,7 +164,9 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.String(16), nullable=False)
     shipping_address = db.Column(db.String(128), nullable=False)
-    created_at = db.Column(db.DateTime(timezone=False), nullable=False)
+    created_at = db.Column(
+        db.Date(), nullable=False, default=date.today(), onupdate=date.today()
+    )
     status = db.Column(
         db.Enum(OrderStatus), nullable=False, server_default=(OrderStatus.CREATED.name)
     )
@@ -237,18 +239,23 @@ class Order(db.Model):
         try:
             self.customer_id = data["customer_id"]
             self.shipping_address = data["shipping_address"]
+            # self.created_at = (
+            #     datetime.strptime(data["created_at"], DATE_FORMAT).date()
+            #     if "created_at" in data
+            #     else date.today()
+            # )
 
-            if isinstance(data["created_at"], str):
-                data["created_at"] = datetime.datetime.strptime(
-                    data["created_at"], "%a, %d %b %Y %H:%M:%S %Z"
-                )
-            elif isinstance(data["created_at"], datetime.datetime):
-                self.created_at = data["created_at"]
-            else:
-                raise DataValidationError(
-                    "Invalid type for datetime [created_at]: "
-                    + datetime.datetime.strftime(data["created_at"], DATE_FORMAT)
-                )
+            # if isinstance(data["created_at"], str):
+            #     data["created_at"] = datetime.datetime.strptime(
+            #         data["created_at"], "%a, %d %b %Y %H:%M:%S %Z"
+            #     )
+            # elif isinstance(data["created_at"], datetime.datetime):
+            #     self.created_at = data["created_at"]
+            # else:
+            #     raise DataValidationError(
+            #         "Invalid type for datetime [created_at]: "
+            #         + datetime.datetime.strftime(data["created_at"], DATE_FORMAT)
+            #     )
 
             try:
                 status = OrderStatus[data["status"].upper()]

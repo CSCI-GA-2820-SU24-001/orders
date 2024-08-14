@@ -2,9 +2,9 @@
 Test Factory to make fake objects for testing
 """
 
-from datetime import datetime, timezone
+from datetime import date
 from factory import Factory, SubFactory, Sequence, Faker, post_generation
-from factory.fuzzy import FuzzyChoice, FuzzyDateTime
+from factory.fuzzy import FuzzyChoice, FuzzyDate
 from service.models import Order, Item, OrderStatus
 
 
@@ -20,7 +20,7 @@ class OrderFactory(Factory):
     id = Sequence(lambda n: n)
     customer_id = Faker("random_digit")
     shipping_address = Faker("street_address")
-    created_at = FuzzyDateTime(datetime(2024, 1, 1, tzinfo=timezone.utc))
+    created_at = FuzzyDate(start_date=date(2000, 1, 1))
     status = FuzzyChoice(
         choices=[OrderStatus.COMPLETED, OrderStatus.CREATED, OrderStatus.PROCESSING]
     )
