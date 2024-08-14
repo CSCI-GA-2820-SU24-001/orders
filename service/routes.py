@@ -171,13 +171,23 @@ order_args.add_argument(
 #  R E S T   A P I   E N D P O I N T S
 ######################################################################
 
+######################################################################
+#  PATH: /orders/
+######################################################################
+
 
 @api.route("/orders")
-class OrderList(Resource):
-    """CLASS FOR Listing Orders"""
+class OrderCollection(Resource):
+    """Allows listing or creating orders
+    GET /orders - Returns all orders
+    POST /orders - Create an order depending on the data in body
+    """
 
+    @api.doc("list_orders")
+    @api.expect(order_args, validate=True)
+    @api.marshal_list_with(order_model)
     def get(self):
-        """Returns all of the Orders"""
+        """Returns all orders"""
         app.logger.info("Request for order list")
 
         orders = []
@@ -205,13 +215,12 @@ class OrderList(Resource):
 
         return results, status.HTTP_200_OK
 
-
-@api.route("/orders")
-class CreateOrder(Resource):
-    """CLASS TO CREATE AN ORDER"""
-
+    @api.doc("create_order")
+    @api.response(400, "Invalid data")
+    @api.expect(order_create_model)
+    @api.marshal_with(order_model, code=201)
     def post(self):
-        """This method creates an order item given the items and their quantities"""
+        """This method creates an order given the items and their quantities"""
         data = request.json
         logger.info("*************DATA*********************")
         logger.info(request.json)
@@ -261,9 +270,16 @@ class CreateOrder(Resource):
 
 
 @api.route("/orders/<int:order_id>")
-class GetOrder(Resource):
-    """CLASS TO GET AN ORDER"""
+class OrderResource(Resource):
+    """Class for the Order resource
+    GET /orders/{order_id: int} - Return an order with order_id
+    PUT /orders/{order_id: int} - Update an order with order_id
+    DELETE /orders/{order_id: int} - Delete an order with order_id
+    """
 
+    @api.doc("get_order")
+    @api.response(404, "Order not found")
+    @api.marshal_with(order_model)
     def get(self, order_id):
         """Returns the details of a specific order
 
@@ -280,18 +296,13 @@ class GetOrder(Resource):
         message["created_at"] = message["created_at"].timestamp()
         return message, status.HTTP_200_OK
 
-
-######################################################################
-#  UPDATE IN ORDER
-######################################################################
-
-
-@api.route("/orders/<int:order_id>")
-class UpdateOrder(Resource):
-    """CLASS TO UPDATE AN ORDER"""
-
+    @api.doc("update_order")
+    @api.response(400, "Invalid data")
+    @api.response(404, "The order was not found")
+    @api.expect(order_create_model)
+    @api.marshal_with(order_model)
     def put(self, order_id):
-        """Update the order"""
+        """Update an order with the given ID"""
         data = request.json
         curr_order = Order.query.filter_by(id=order_id).first()
 
@@ -343,18 +354,10 @@ class UpdateOrder(Resource):
 
         return message, status.HTTP_200_OK
 
-
-######################################################################
-#  DELETE ORDER
-######################################################################
-
-
-@api.route("/orders/<int:order_id>")
-class DeleteOrder(Resource):
-    """CLASS TO DELETE AN ORDER"""
-
+    @api.doc("delete_order")
+    @api.response(204, "Order deleted successfully")
     def delete(self, order_id):
-        """Delete an order"""
+        """Delete an order given an order ID"""
         logger.info("Deleting order with ID: %s", order_id)
 
         curr_order = Order.query.filter_by(id=order_id).first()
@@ -369,10 +372,19 @@ class DeleteOrder(Resource):
         return "", status.HTTP_204_NO_CONTENT
 
 
-@api.route("/orders/<int:order_id>/items")
-class AddItem(Resource):
-    """CLASS TO ADD AN ITEM"""
+######################################################################
+#  PATH: /orders/{order_id:int}/items
+######################################################################
 
+
+@api.route("/orders/<int:order_id>/items")
+class ItemCollection(Resource):
+    """Class to handle Item collection operations"""
+
+    @api.doc("create_item")
+    @api.response(400, "Invalid Item data")
+    @api.expect(item_model)
+    @api.marshal_with(item_model, code=201)
     def post(self, order_id):
         """
         Add a new item to an order.
@@ -414,6 +426,8 @@ class AddItem(Resource):
             {"Location": location_url},
         )
 
+    @api.doc("list_order_items")
+    @api.marshal_list_with(item_model)
     def get(self, order_id):
         """Returns the list of items in an order"""
         order_id = int(order_id)
@@ -448,14 +462,24 @@ class AddItem(Resource):
 
 
 ######################################################################
-#  View a single item in an order
+#  PATH: /orders/{order_id:int}/item/{item_id:int}
 ######################################################################
-
-
 @api.route("/orders/<int:order_id>/item/<int:item_id>")
-class GetItem(Resource):
-    """CLASS TO GET AN ITEM"""
+@api.param("order_id", "The ID of the order (integer)")
+@api.param("item_id", "The ID of the item in the order (integer)r")
+class ItemResource(Resource):
+    """
+    ItemResource
+    Handle operations on a single Item in an order
+    GET /orders/{order_id}/item/{item_id} - Get the order item with the given id
+    PUT /orders/{order_id}/item/{item_id} - Update the order item with the given id
+    DELETE /orders/{order_id}/item/{item_id} - Delete the order item with the given id
 
+    """
+
+    @api.doc("get_order_item")
+    @api.response(404, "Item Not Found")
+    @api.marshal_with(item_model)
     def get(self, order_id, item_id):
         """Returns the details of an item in an order
 
@@ -476,18 +500,13 @@ class GetItem(Resource):
 
         return message, status.HTTP_200_OK
 
-
-######################################################################
-#  UPDATE AN ITEM IN THE ORDER
-######################################################################
-
-
-@api.route("/orders/<int:order_id>/item/<int:item_id>")
-class UpdateItem(Resource):
-    """CLASS TO UPDATE AN ITEM"""
-
+    @api.doc("update_order_item")
+    @api.response(404, "Item not found")
+    @api.response(400, "Invalid Item data")
+    @api.expect(item_model)
+    @api.marshal_with(item_model)
     def put(self, order_id, item_id):
-        """Update an item in the order"""
+        """Update an item in the order given order ID and item ID"""
         logger.info("Updating item with ID: %s in order with ID: %s", item_id, order_id)
 
         data = request.json
@@ -527,11 +546,8 @@ class UpdateItem(Resource):
         message = item.serialize()
         return message, status.HTTP_200_OK
 
-
-@api.route("/orders/<int:order_id>/item/<int:item_id>")
-class DeleteItem(Resource):
-    """CLASS TO DELETE AN ITEM"""
-
+    @api.doc("delete_order_item")
+    @api.response(204, "Item deleted")
     def delete(self, order_id, item_id):
         """Delete an item from the order
 
@@ -561,18 +577,18 @@ class DeleteItem(Resource):
 
 
 ######################################################################
-#  Add/Create a new item
-######################################################################
-
-######################################################################
-#  CHANGE THE STATUS OF THE ORDER
+#  PATH: /orders/{order_id:int}/status
 ######################################################################
 
 
 @api.route("/orders/<int:order_id>/status")
-class ChangeOrderStatus(Resource):
+@api.param("order_id", "The order identifier")
+class OrderChangeStatus(Resource):
     """Change the status of an order"""
 
+    @api.doc("change_order_status")
+    @api.response(400, "Invalid status provided. Order status cannot be updated")
+    @api.marshal_with(order_model)
     def put(self, order_id):
         """CHANGE ORDER STATUS
 
