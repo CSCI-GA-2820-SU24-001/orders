@@ -101,6 +101,14 @@ honcho start
 
 After the service start, you can access at `http://localhost:8000`.
 
+## Kubernetes
+- **Delete cluster:** make cluster-rm
+- **Create cluster:** make cluster
+- **Build the docker image:** docker build -t orders:latest .
+- **Create tag for image:** docker tag orders:latest cluster-registry:5000/orders:latest
+- **Push the docker image:** docker push cluster-registry:5000/orders:latest
+- **Apply Kubernetes:** kubectl apply -f k8s/ or alternatively, make deploy
+
 
 ## License
 
