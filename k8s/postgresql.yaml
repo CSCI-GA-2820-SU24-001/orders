@@ -30,7 +30,7 @@ spec:
                   key: password
           volumeMounts:
             - name: postgres-storage
-              mountPath: /var/lib/postgresql/data
+              mountPath: /var/lib/postgresql
           resources:
             limits:
               cpu: "0.50"
@@ -55,7 +55,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: "default"
+#  storageClassName: "default"
 
 ---
 apiVersion: v1
