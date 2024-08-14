@@ -14,7 +14,12 @@ from sqlalchemy.exc import (
     DatabaseError,
 )
 from wsgi import app
-from service.models import db, Order, Item, DataValidationError
+from service.models import (
+    db,
+    Order,
+    Item,
+    DataValidationError,
+)
 from .factories import OrderFactory, ItemFactory
 
 DATABASE_URI = os.getenv(

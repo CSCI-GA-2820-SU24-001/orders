@@ -57,7 +57,7 @@ $(function () {
 
         let ajax = $.ajax({
             type: "POST",
-            url: "/orders",
+            url: "/api/orders/",
             contentType: "application/json",
             data: JSON.stringify(data),
         });
@@ -98,7 +98,7 @@ $(function () {
 
         let ajax = $.ajax({
             type: "PUT",
-            url: `/orders/${order_id}`,
+            url: `/api/orders/${order_id}`,
             contentType: "application/json",
             data: JSON.stringify(data)
         })
@@ -126,7 +126,7 @@ $(function () {
 
         let ajax = $.ajax({
             type: "GET",
-            url: `/orders/${order_id}`,
+            url: `/api/orders/${order_id}`,
             contentType: "application/json",
             data: ''
         })
@@ -156,7 +156,7 @@ $(function () {
 
         let ajax = $.ajax({
             type: "DELETE",
-            url: `/orders/${order_id}`,
+            url: `/api/orders/${order_id}`,
             contentType: "application/json",
             data: '',
         })
@@ -261,7 +261,7 @@ $(function () {
 
 
 $(document).ready(function () {
-    const url = "/orders"
+    const url = "/api/orders/"
 
     // Function to fetch JSON data
     function fetchJSONData() {
@@ -274,7 +274,7 @@ $(document).ready(function () {
                 fillTable(response);
             },
             error: function (error) {
-                console.log('Error fetching data', error);
+                // console.log('Error fetching data', error);
             }
         });
     }
@@ -297,18 +297,20 @@ $(document).ready(function () {
             const row = $('<tr>');
             // Only add the first and second properties
             const values = Object.values(item);
+            // console.log("THESE VALUES");
+            // console.log(values);
             // Assuming the structure is known, you can directly access the values you want to keep
-            const created_at = values[0];
-            const customer_id = values[1];
-            const order_id = values[2];
-            const items = values[3];
-            const order_id_dup = values[4];
+            var created_at = values[1];
+            const customer_id = values[3];
+            const order_id = values[0];
+            const items = values[6];
+            // const order_id_dup = values[1];
 
             const shipping_address = values[5];
-            const status = values[6];
+            const status = values[4];
 
             $.ajax({
-                url: "/orders/" + order_id + "/items",
+                url: `/api/orders/${order_id}/items`,
                 type: 'GET',
                 dataType: 'json',
                 success: function (response) {
@@ -319,11 +321,11 @@ $(document).ready(function () {
                     // }
                     const ids = response.map(item => item.id);
                     row.append($('<td>').text(ids));
-                    console.log("RESPONSE");
-                    console.log(response);
+                    // console.log("RESPONSE");
+                    // console.log(response);
                 },
                 error: function (error) {
-                    console.log('Error fetching data', error);
+                    // console.log('Error fetching data', error);
                 }
             });
 
@@ -332,8 +334,8 @@ $(document).ready(function () {
             row.append($('<td>').text(customer_id));
             row.append($('<td>').text(created_at));
             // row.append($('<td>').text(items));
-            console.log("ITEMS: ");
-            console.log(items);
+            // console.log("ITEMS: ");
+            // console.log(items);
             row.append($('<td>').text(shipping_address));
             row.append($('<td>').text(status));
 
@@ -352,7 +354,7 @@ $(document).ready(function () {
 
 // FUNCTION TO FILL ITEM TABLE
 $(document).ready(function () {
-    const url = "/orders"
+    const url = "/api/orders/"
 
     // Function to fetch JSON data
     function fetchJSONDataItems() {
@@ -365,7 +367,7 @@ $(document).ready(function () {
                 fillTableItems(response);
             },
             error: function (error) {
-                console.log('Error fetching data', error);
+                // console.log('Error fetching data', error);
             }
         });
     }
@@ -383,19 +385,21 @@ $(document).ready(function () {
         // Clear any existing content
         tbody.empty();
         var done_prods = []
+        // console.log(data)
 
         // Create table rows
         data.forEach(item => {
             const row = $('<tr>');
             const values = Object.values(item);
-            const order_id = values[2];
-
+            const order_id = values[0];
+            // console.log("Trying to get items");
+            // console.log(values);
             $.ajax({
-                url: "/orders/" + order_id + "/items",
+                url: `/api/orders/${order_id}/items`,
                 type: 'GET',
                 dataType: 'json',
                 success: function (response) {
-                    console.log(response);
+                    // console.log(response);
                     response.forEach(item => {
                         let row = $('<tr></tr>');
                         var item_id = item["id"];
@@ -413,14 +417,14 @@ $(document).ready(function () {
                             row.append($('<td></td>').text(product_desc));
 
                             done_prods.push(product_id);
-                            console.log("ARRAY");
-                            console.log(done_prods);
+                            // console.log("ARRAY");
+                            // console.log(done_prods);
                             tbody.append(row);
                         }
                     });
                 },
                 error: function (error) {
-                    console.log('Error fetching data', error);
+                    // console.log('Error fetching data', error);
                 }
             });
 
@@ -436,11 +440,11 @@ $(document).ready(function () {
 });
 
 $(document).ready(function () {
-    const url = "/orders";
+    const url = "/api/orders/";
 
     function fetchJSONDataByStatus(status) {
         const queryUrl = `${url}?status_name=${status}`;
-        console.log('Fetching data from:', queryUrl);
+        // console.log('Fetching data from:', queryUrl);
         $.ajax({
             url: queryUrl,
             type: 'GET',
@@ -450,7 +454,7 @@ $(document).ready(function () {
                 flash_message("Success");
             },
             error: function (error) {
-                console.log('Error fetching data', error);
+                // console.log('Error fetching data', error);
             }
         });
     }
@@ -463,27 +467,28 @@ $(document).ready(function () {
         data.forEach(item => {
             const row = $('<tr>');
             const values = Object.values(item);
-            console.log(values);
-            const created_at = values[0];
-            const customer_id = values[1];
-            const order_id = values[2];
-            const items = values[3];
-            const order_id_dup = values[4];
+            // console.log("DROPDOWN LOG");
+            // console.log(values);
+            const created_at = values[1];
+            const customer_id = values[3];
+            const order_id = values[0];
+            const items = values[6];
+            // const order_id_dup = values[1];
             const shipping_address = values[5];
-            const status = values[6];
-    
+            const status = values[4];
+
             $.ajax({
-                url: `/orders/${order_id}/items`,
+                url: `/api/orders/${order_id}/items`,
                 type: 'GET',
                 dataType: 'json',
                 success: function (response) {
                     const ids = response.map(item => item.id);
                     row.append($('<td>').text(ids));
-                    console.log("RESPONSE");
-                    console.log(response);
+                    // console.log("RESPONSE");
+                    // console.log(response);
                 },
                 error: function (error) {
-                    console.log('Error fetching data', error);
+                    // console.log('Error fetching data', error);
                 }
             });
 
@@ -511,7 +516,7 @@ $(document).ready(function () {
 });
 
 $(document).ready(function () {
-    const url = "/orders";
+    const url = "/api/orders/";
 
     var customerIdModal = document.getElementById("customerIdModal");
     var searchByCustomerIdBtn = document.getElementById("searchbycustomerid-btn");
@@ -533,7 +538,7 @@ $(document).ready(function () {
 
     function fetchJSONDataByCustomerId(customer_id) {
         const queryUrl = `${url}?customer_id=${customer_id}`;
-        console.log('Fetching data from:', queryUrl);
+        // console.log('Fetching data from:', queryUrl);
         $.ajax({
             url: queryUrl,
             type: 'GET',
@@ -547,7 +552,7 @@ $(document).ready(function () {
                 }
             },
             error: function (res) {
-                console.log('Error fetching data', error);
+                // console.log('Error fetching data', error);
                 flash_message(res.responseJSON.message);
             }
         });
@@ -561,24 +566,26 @@ $(document).ready(function () {
         data.forEach(item => {
             const row = $('<tr>');
             const values = Object.values(item);
-            const created_at = values[0];
-            const customer_id = values[1];
-            const order_id = values[2];
+            // console.log("SEARCH VALUES");
+            // console.log(values);
+            const created_at = values[1];
+            const customer_id = values[3];
+            const order_id = values[0];
             const shipping_address = values[5];
-            const status = values[6];
+            const status = values[4];
 
             $.ajax({
-                url: `/orders/${order_id}/items`,
+                url: `/api/orders/${order_id}/items`,
                 type: 'GET',
                 dataType: 'json',
                 success: function (response) {
                     const ids = response.map(item => item.id);
                     row.append($('<td>').text(ids));
-                    console.log("RESPONSE");
-                    console.log(response);
+                    // console.log("RESPONSE");
+                    // console.log(response);
                 },
                 error: function (error) {
-                    console.log('Error fetching data', error);
+                    // console.log('Error fetching data', error);
                 }
             });
 
@@ -643,7 +650,7 @@ $(document).ready(function () {
 
         $.ajax({
             type: "PUT",
-            url: `/orders/${orderId}/status`,
+            url: `/api/orders/${orderId}/status`,
             contentType: "application/json",
             data: JSON.stringify(data),
             success: function (res) {
@@ -789,7 +796,7 @@ document.getElementById("orderForm").onsubmit = function (event) {
         // };
 
         // var orderJSON = JSON.stringify(orderData);
-        // console.log(orderJSON);
+        // // console.log(orderJSON);
 
         const array_ids = itemIds.split(',');
         const array_quantities = itemQuantities.split(',');
@@ -797,11 +804,11 @@ document.getElementById("orderForm").onsubmit = function (event) {
         var array_ids_temp = new Array();
         var array_item_temp = new Array();
 
-        console.log("ARRAY ITEM STRING: ");
-        console.log("ARRAY IDS STRING: ");
+        // console.log("ARRAY ITEM STRING: ");
+        // console.log("ARRAY IDS STRING: ");
 
-        console.log(array_ids);
-        console.log(array_quantities);
+        // console.log(array_ids);
+        // console.log(array_quantities);
 
 
         for (var i = 0; i < array_ids.length; i++) {
@@ -819,11 +826,11 @@ document.getElementById("orderForm").onsubmit = function (event) {
                 return
             }
         }
-        console.log("ARRAY ITEM: ");
-        console.log("ARRAY IDS: ");
+        // console.log("ARRAY ITEM: ");
+        // console.log("ARRAY IDS: ");
 
-        console.log(array_item_temp);
-        console.log(array_ids_temp);
+        // console.log(array_item_temp);
+        // console.log(array_ids_temp);
 
         if (array_ids.length != array_quantities.length) {
             alert("Number of item IDs and quantities must match");
@@ -832,26 +839,26 @@ document.getElementById("orderForm").onsubmit = function (event) {
 
 
         var requestObject = createRequestObject(array_ids_temp, array_item_temp, shippingAddress);
-        console.log(JSON.stringify(requestObject));
+        // console.log(JSON.stringify(requestObject));
 
         let ajax = $.ajax({
             type: "POST",
-            url: "/orders",
+            url: "/api/orders/",
             contentType: "application/json",
             data: JSON.stringify(requestObject),
         });
 
         ajax.done(function (res, textStatus, xhr) {
             flash_message_create(res)
-            console.log("RESULT: ");
-            console.log(res);
-            console.log(xhr.status);
+            // console.log("RESULT: ");
+            // console.log(res);
+            // console.log(xhr.status);
             $("#orders_status").text(xhr.status);
         });
 
         ajax.fail(function (res) {
             flash_message_create(res.responseJSON.message)
-            console.log(res);
+            // console.log(res);
         });
     }
 }
@@ -908,7 +915,7 @@ document.getElementById("updateorderForm").onsubmit = function (event) {
         // };
 
         // var orderJSON = JSON.stringify(orderData);
-        // console.log(orderJSON);
+        // // console.log(orderJSON);
 
         const array_ids = itemIds.split(',');
         const array_quantities = itemQuantities.split(',');
@@ -916,11 +923,11 @@ document.getElementById("updateorderForm").onsubmit = function (event) {
         var array_ids_temp = new Array();
         var array_item_temp = new Array();
 
-        console.log("ARRAY ITEM STRING: ");
-        console.log("ARRAY IDS STRING: ");
+        // console.log("ARRAY ITEM STRING: ");
+        // console.log("ARRAY IDS STRING: ");
 
-        console.log(array_ids);
-        console.log(array_quantities);
+        // console.log(array_ids);
+        // console.log(array_quantities);
 
 
         for (var i = 0; i < array_ids.length; i++) {
@@ -938,11 +945,11 @@ document.getElementById("updateorderForm").onsubmit = function (event) {
                 return
             }
         }
-        console.log("ARRAY ITEM: ");
-        console.log("ARRAY IDS: ");
+        // console.log("ARRAY ITEM: ");
+        // console.log("ARRAY IDS: ");
 
-        console.log(array_item_temp);
-        console.log(array_ids_temp);
+        // console.log(array_item_temp);
+        // console.log(array_ids_temp);
 
         if (array_ids.length != array_quantities.length) {
             alert("Number of item IDs and quantities must match");
@@ -951,26 +958,26 @@ document.getElementById("updateorderForm").onsubmit = function (event) {
 
 
         var requestObject = createRequestObject(array_ids_temp, array_item_temp, shippingAddress);
-        console.log(JSON.stringify(requestObject));
+        // console.log(JSON.stringify(requestObject));
 
         let ajax = $.ajax({
             type: "PUT",
-            url: `/orders/${orderID}`,
+            url: `/api/orders/${orderID}`,
             contentType: "application/json",
             data: JSON.stringify(requestObject),
         });
 
         ajax.done(function (res, textStatus, xhr) {
             flash_message_create(res)
-            console.log("RESULT: ");
-            console.log(res);
-            console.log(xhr.status);
+            // console.log("RESULT: ");
+            // console.log(res);
+            // console.log(xhr.status);
             $("#orders_status").text(xhr.status);
         });
 
         ajax.fail(function (res) {
             flash_message_create(res.responseJSON.message)
-            console.log(res);
+            // console.log(res);
         });
     }
 }
@@ -1000,27 +1007,27 @@ document.getElementById("orderIdForm").onsubmit = function (event) {
 
     // If all fields are valid, create JSON object
     if (isValid) {
-        console.log(orderId);
+        // console.log(orderId);
 
         let ajax = $.ajax({
             type: "DELETE",
-            url: `/orders/${orderId}`,
+            url: `/api/orders/${orderId}`,
             contentType: "application/json",
             data: '',
         });
 
         ajax.done(function (res, textStatus, xhr) {
             flash_message_create(res)
-            console.log("RESULT: ");
-            console.log(res);
-            console.log(xhr.status);
+            // console.log("RESULT: ");
+            // console.log(res);
+            // console.log(xhr.status);
             if (xhr.status == "204")
                 $("#orders_status").text("Deleted Successfully (204)");
         });
 
         ajax.fail(function (res) {
             flash_message_create(res.responseJSON.message)
-            console.log(res);
+            // console.log(res);
         });
     }
 }
