@@ -101,20 +101,6 @@
         </div> 
     </div> 
     </div> end Form -->
-
-
-    <div class="button-group" style="margin-bottom: 20px;">
-        <button id="createorder-btn">Create an order</button>
-        <button id="updateorder-btn">Update an order</button>
-
-        <button id="viewallorder-btn">View all orders</button>
-        <button id="viewallitems-btn">View all items</button>
-        <button id="deleteorder-btn">Delete an order</button>
-        <button id="readorder-btn">Read Order</button>
-    </div>
-       
-
-
         <h3>Order Operations:</h3>
 
         <button id="createorder-btn" class="button_orders">Create an order</button>
@@ -126,6 +112,8 @@
 
         <button id="changeorderstatus-btn" class="button_orders">Change Order Status</button>
         <button id="searchbycustomerid-btn" class="button_orders">Search by Customer ID</button>
+        <button id="readorder-btn" class="button_orders">Read Order</button>
+
         <br />
         <hr />
         <!-- Status Dropdown -->
@@ -284,7 +272,7 @@
                         <th class="col-md-4">Created At</th>
                         <th class="col-md-3">Shipping Address</th>
                         <th class="col-md-3">Status</th>
-                        <th class="col-md-3">Item IDs</th>
+                        <th class="col-md-3">Items</th>
                     </tr>
                 </thead>
                 <tbody id="search-results-body">
@@ -308,27 +296,27 @@
             </table>
         </div>
         <!-- Trigger the Modal -->
-<!-- The Modal -->
+        <!-- The Modal -->
         <!-- Read Order Modal -->
         <div id="readOrderModal" class="modal">
-           <div class="modal-content">
-             <span class="close" id="closereadordermodal-btn">&times;</span>
-               <form id="orderIdForm">
-                   <div class="form-group">
-                     <label for="orderId">Order ID:</label>
-                       <input type="text" id="orders_readorder_id" name="readOrderId" class="form-control"
-                           placeholder="Enter Order ID" required>
-                       <span class="error" id="orderIdError">Order ID is required</span>
-                   </div>
-                 <button  id="fetchorder-btn">Fetch Order</button>
-               </form>
+            <div class="modal-content">
+                <span class="close" id="closereadordermodal-btn">&times;</span>
+                <form id="orderIdForm">
+                    <div class="form-group">
+                        <label for="orderId">Order ID:</label>
+                        <input type="text" id="orders_readorder_id" name="readOrderId" class="form-control"
+                            placeholder="Enter Order ID" required>
+                        <span class="error" id="orderIdError">Order ID is required</span>
+                    </div>
+                    <button id="fetchorder-btn">Fetch Order</button>
+                </form>
             </div>
         </div>
 
 
-        
-        
-        
+
+
+
         <footer>
             <br><br>
             <p>&copy; NYU DevOps Orders Company 2024</p>

@@ -32,36 +32,28 @@ $(function () {
         $("#orders_status").empty();
         $("#orders_status").append(message);
     }
-// ****************************************
-// Read an order 
-// ****************************************
 
-// Get the modal
-var modal = document.getElementById("readOrderModal");
+    // ****************************************
+    // Create a order
+    // ****************************************
 
-// Get the button that opens the modal
-var btn = document.getElementById("readorder-btn");
+    $("#create-btn").click(function () {
 
-// Get the <span> element that closes the modal
-var span = document.getElementsByClassName("close")[0];
+        let name = $("#order_name").val();
+        let category = $("#order_category").val();
+        let available = $("#order_available").val() == "true";
+        let gender = $("#order_gender").val();
+        let birthday = $("#order_birthday").val();
 
-// When the user clicks the button, open the modal
-btn.onclick = function() {
-    modal.style.display = "block";
-}
+        let data = {
+            "name": name,
+            "category": category,
+            "available": available,
+            "gender": gender,
+            "birthday": birthday
+        };
 
-// When the user clicks on <span> (x), close the modal
-span.onclick = function() {
-    modal.style.display = "none";
-}
-
-
-// When the user clicks anywhere outside of the modal, close it
-window.onclick = function(event) {
-    if (event.target == modal) {
-        modal.style.display = "none";
-    }
-}
+        $("#orders_status").empty();
 
         let ajax = $.ajax({
             type: "POST",
@@ -70,61 +62,15 @@ window.onclick = function(event) {
             data: JSON.stringify(data),
         });
 
+        ajax.done(function (res) {
+            update_form_data(res)
+            flash_message("Success")
+        });
 
-// Fetch Order when "Fetch Order" button is clicked in the modal
-$("#fetchorder-btn").click(function (event) {
-    event.preventDefault();
-
-    let orderId = $("#orders_readorder_id").val();
-
-    if (!orderId) {
-        
-        return;
-    }
-
-    $("#orders_status").empty();
-
-    let ajax = $.ajax({
-        type: "GET",
-        url: `/orders/${orderId}`,
-        contentType: "application/json",
+        ajax.fail(function (res) {
+            flash_message(res.responseJSON.message)
+        });
     });
-
-    ajax.done(function (res) {
-        console.log(res);
-        updateTable(res);  // Function to update the table with the order details
-        modal.style.display = "none"; // Close the modal after fetching
-        flash_message("200");
-    });
-
-    ajax.fail(function (res) {
-        console.error("Error fetching order:", res);
-        flash_message("No order found or error occurred.");
-    });
-    return false;
-});
-
-// Function to update the existing table with the order details
-function updateTable(order) {
-    var table = document.getElementById("search-results-body");
-
-    // Clear previous data if you want to replace the existing content
-    table.innerHTML = "";
-
-    // Add new row with fetched order details
-    var row = document.createElement("tr");
-
-    row.innerHTML = `
-        <td>${order.id}</td>
-        <td>${order.customer_id}</td>
-        <td>${order.created_at}</td>
-        <td>${order.shipping_address}</td>
-        <td>${order.status}</td>
-        <td>${order.items.map(item => item.id).join(", ")}</td>
-    `;
-
-    table.appendChild(row);
-}
 
 
     // ****************************************
@@ -373,7 +319,7 @@ $(document).ready(function () {
                     // for (resp in response) {
                     //     st = st + resp["id"] + ",";
                     // }
-                    const ids = response.map(item => item.id);
+                    const ids = response.map(item => item.product_description);
                     row.append($('<td>').text(ids));
                     // console.log("RESPONSE");
                     // console.log(response);
@@ -536,7 +482,7 @@ $(document).ready(function () {
                 type: 'GET',
                 dataType: 'json',
                 success: function (response) {
-                    const ids = response.map(item => item.id);
+                    const ids = response.map(item => item.product_description);
                     row.append($('<td>').text(ids));
                     // console.log("RESPONSE");
                     // console.log(response);
@@ -633,7 +579,7 @@ $(document).ready(function () {
                 type: 'GET',
                 dataType: 'json',
                 success: function (response) {
-                    const ids = response.map(item => item.id);
+                    const ids = response.map(item => item.product_description);
                     row.append($('<td>').text(ids));
                     // console.log("RESPONSE");
                     // console.log(response);
@@ -728,12 +674,17 @@ $(document).ready(function () {
 var modal = document.getElementById("orderModal");
 var updatemodal = document.getElementById("updateorderModal");
 var deletemodal = document.getElementById("deleteOrderModal");
+var readmodal = document.getElementById("readOrderModal");
+
 
 
 
 var btn = document.getElementById("createorder-btn");
 var btn_update = document.getElementById("updateorder-btn");
 var btn_delete = document.getElementById("deleteorder-btn");
+
+
+var close_read = document.getElementById("closereadordermodal-btn");
 
 
 var close_update = document.getElementById("updatecloseordermodal-btn")
@@ -752,6 +703,10 @@ btn.onclick = function () {
 
 close_create.onclick = function () {
     modal.style.display = "none";
+}
+
+close_read.onclick = function () {
+    readmodal.style.display = "none";
 }
 
 
@@ -798,6 +753,97 @@ function createRequestObject(array_ids, array_quantities, shippingAddress) {
         items: items,
         shippingAddress: shippingAddress
     };
+}
+
+// ****************************************
+// Read an order 
+// ****************************************
+
+// Get the modal
+var readmodal = document.getElementById("readOrderModal");
+
+// Get the button that opens the modal
+var readbtn = document.getElementById("readorder-btn");
+
+// Get the <span> element that closes the modal
+// var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks the button, open the modal
+readbtn.onclick = function () {
+    readmodal.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the modal
+// span.onclick = function () {
+//     modal.style.display = "none";
+// }
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function (event) {
+    if (event.target == modal) {
+        readmodal.style.display = "none";
+    }
+}
+
+function flash_message(message) {
+    $("#orders_status").empty();
+    $("#orders_status").append(message);
+}
+
+// Fetch Order when "Fetch Order" button is clicked in the modal
+$("#fetchorder-btn").click(function (event) {
+    event.preventDefault();
+
+    let orderId = $("#orders_readorder_id").val();
+
+    if (!orderId) {
+
+        return;
+    }
+
+    $("#orders_status").empty();
+
+    let ajax = $.ajax({
+        type: "GET",
+        url: `/api/orders/${orderId}`,
+        contentType: "application/json",
+    });
+
+    ajax.done(function (res) {
+        console.log(res);
+        updateTable(res);  // Function to update the table with the order details
+        modal.style.display = "none"; // Close the modal after fetching
+        flash_message("200");
+    });
+
+    ajax.fail(function (res) {
+        console.error("Error fetching order:", res);
+        flash_message("No order found or error occurred.");
+    });
+    return false;
+});
+
+// Function to update the existing table with the order details
+function updateTable(order) {
+    var table = document.getElementById("search-results-body");
+
+    // Clear previous data if you want to replace the existing content
+    table.innerHTML = "";
+
+    // Add new row with fetched order details
+    var row = document.createElement("tr");
+
+    row.innerHTML = `
+        <td>${order.id}</td>
+        <td>${order.customer_id}</td>
+        <td>${order.created_at}</td>
+        <td>${order.shipping_address}</td>
+        <td>${order.status}</td>
+        <td>${order.items.map(item => item.
+        product_description).join(", ")}</td>
+    `;
+
+    table.appendChild(row);
 }
 
 
@@ -1120,5 +1166,3 @@ function createRequestObject(itemIds, itemQuantities, shippingAddress) {
 
     return request;
 }
-
-
