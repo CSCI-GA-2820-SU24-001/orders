@@ -32,118 +32,90 @@ $(function () {
         $("#orders_status").empty();
         $("#orders_status").append(message);
     }
-       // ****************************************
-    // Read an order and show in modal
-    // ****************************************
- // Get the modal
+// ****************************************
+// Read an order 
+// ****************************************
+
+// Get the modal
 var modal = document.getElementById("readOrderModal");
 
 // Get the button that opens the modal
-var btn = document.getElementById("readOrderBtn");
+var btn = document.getElementById("readorder-btn");
 
 // Get the <span> element that closes the modal
 var span = document.getElementsByClassName("close")[0];
 
 // When the user clicks the button, open the modal
 btn.onclick = function() {
-  modal.style.display = "block";
+    modal.style.display = "block";
 }
 
 // When the user clicks on <span> (x), close the modal
 span.onclick = function() {
-  modal.style.display = "none";
+    modal.style.display = "none";
 }
 
 // When the user clicks anywhere outside of the modal, close it
 window.onclick = function(event) {
-  if (event.target == modal) {
-    modal.style.display = "none";
-  }
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
 }
 
 // Fetch Order when "Fetch Order" button is clicked in the modal
-document.getElementById("fetchOrderBtn").onclick = function() {
-  var orderId = document.getElementById("orderIdInput").value;
+$("#fetchorder-btn").click(function (event) {
+    event.preventDefault();
 
-  if (!orderId) {
-    alert("Please enter an Order ID.");
-    return;
-  }
+    let orderId = $("#orders_readorder_id").val();
 
-  // Fetch the order details
-  // Note: You need to replace this with your actual API call
-  fetch(`/orders/${orderId}`)
-    .then(response => response.json())
-    .then(data => {
-      updateTable(data);
-      modal.style.display = "none"; // Close the modal after fetching
-    })
-    .catch(error => {
-      console.error("Error fetching order:", error);
-      alert("No order found.");
+    if (!orderId) {
+        
+        return;
+    }
+
+    $("#orders_status").empty();
+
+    let ajax = $.ajax({
+        type: "GET",
+        url: `/orders/${orderId}`,
+        contentType: "application/json",
     });
-};
+
+    ajax.done(function (res) {
+        console.log(res);
+        updateTable(res);  // Function to update the table with the order details
+        modal.style.display = "none"; // Close the modal after fetching
+        flash_message("200");
+    });
+
+    ajax.fail(function (res) {
+        console.error("Error fetching order:", res);
+        flash_message("No order found or error occurred.");
+    });
+    return false;
+});
 
 // Function to update the existing table with the order details
 function updateTable(order) {
-  var table = document.getElementById("search-results-body");
-  
-  // Clear previous data if you want to replace the existing content
-  table.innerHTML = ""; 
+    var table = document.getElementById("search-results-body");
 
-  // Add new row with fetched order details
-  var row = document.createElement("tr");
+    // Clear previous data if you want to replace the existing content
+    table.innerHTML = "";
 
-  row.innerHTML = `
-    <td>${order.id}</td>
-    <td>${order.customer_id}</td>
-    <td>${order.created_at}</td>
-    <td>${order.shipping_address}</td>
-    <td>${order.status}</td>
-    <td>${order.items.map(item => item.id).join(", ")}</td>
-  `;
+    // Add new row with fetched order details
+    var row = document.createElement("tr");
 
-  table.appendChild(row);
+    row.innerHTML = `
+        <td>${order.id}</td>
+        <td>${order.customer_id}</td>
+        <td>${order.created_at}</td>
+        <td>${order.shipping_address}</td>
+        <td>${order.status}</td>
+        <td>${order.items.map(item => item.id).join(", ")}</td>
+    `;
+
+    table.appendChild(row);
 }
-
-    // ****************************************
-    // Create a order
-    // ****************************************
-
-    $("#create-btn").click(function () {
-
-        let name = $("#order_name").val();
-        let category = $("#order_category").val();
-        let available = $("#order_available").val() == "true";
-        let gender = $("#order_gender").val();
-        let birthday = $("#order_birthday").val();
-
-        let data = {
-            "name": name,
-            "category": category,
-            "available": available,
-            "gender": gender,
-            "birthday": birthday
-        };
-
-        $("#orders_status").empty();
-
-        let ajax = $.ajax({
-            type: "POST",
-            url: "/orders",
-            contentType: "application/json",
-            data: JSON.stringify(data),
-        });
-
-        ajax.done(function (res) {
-            update_form_data(res)
-            flash_message("Success")
-        });
-
-        ajax.fail(function (res) {
-            flash_message(res.responseJSON.message)
-        });
-    });
 
 
     // ****************************************

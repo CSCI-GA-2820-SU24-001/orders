@@ -1,0 +1,5 @@
+[MASTER]
+extension-pkg-whitelist=behave
+
+[TYPECHECK]
+ignored-modules=behave

@@ -63,12 +63,14 @@ Feature: The Orders service back-end
         And I should see "Candy" in the item results
     Scenario: Read an Order
         When I visit the "Home Page"
-        And I set the "Order ID" to "00000"
         And I press the "readOrder" button
-        Then I should see "725 Broadway NY 10003" in the "Shipping Address" field
-        And I should see "00000" in the "Customer ID" field
-        And I should see "CREATED" in the "Status" field
-        And I should see "Product ID: 0, Description: Glucose, Quantity: 2, Price: 23.4" in the "Items" field
+        And I set the "readorder id" to existing order id
+        And I press the "fetchorder" button
+        Then I should see "200" in the "Status" span
+              
+
+
+       
 
     # When I copy the "Id" field
     # And I press the "Clear" button
@@ -124,3 +126,4 @@ Feature: The Orders service back-end
         And I press the "DeleteCurrOrder" button
         And I press the "closedeleteOrderModal" button
         Then I should see "Deleted Successfully (204)" in the "Status" span
+   

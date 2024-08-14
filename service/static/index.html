@@ -109,7 +109,7 @@
         <button id="viewallorder-btn">View all orders</button>
         <button id="viewallitems-btn">View all items</button>
         <button id="deleteorder-btn">Delete an order</button>
-        <button id="readOrderBtn">Read Order</button> 
+        <button id="readorder-btn">Read Order</button>
     </div>
        
 
@@ -299,53 +299,23 @@
         </div>
         <!-- Trigger the Modal -->
 <!-- The Modal -->
+        <!-- Read Order Modal -->
         <div id="readOrderModal" class="modal">
-            <div class="modal-content">
-           <span class="close">&times;</span>
-           <h2>Enter Order ID</h2>
-           <input type="text" id="orderIdInput" placeholder="Enter Order ID">
-           <button id="fetchOrderBtn">Fetch Order</button>
+           <div class="modal-content">
+             <span class="close" id="closereadordermodal-btn">&times;</span>
+               <form id="orderIdForm">
+                   <div class="form-group">
+                     <label for="orderId">Order ID:</label>
+                       <input type="text" id="orders_readorder_id" name="readOrderId" class="form-control"
+                           placeholder="Enter Order ID" required>
+                       <span class="error" id="orderIdError">Order ID is required</span>
+                   </div>
+                 <button  id="fetchorder-btn">Fetch Order</button>
+               </form>
+            </div>
         </div>
-</div>
-<style>
 
-            /* Style for Modal */
-            .modal {
-                display: none;
-                position: fixed;
-                z-index: 1;
-                left: 0;
-                top: 0;
-                width: 100%;
-                height: 100%;
-                overflow: auto;
-                background-color: rgba(0, 0, 0, 0.4);
-                padding-top: 60px;
-            }
-            
-            .modal-content {
-                background-color: #fefefe;
-                margin: 5% auto;
-                padding: 20px;
-                border: 1px solid #888;
-                width: 30%; /* Adjusted width */
-                text-align: center; /* Center the content */
-            }
-            
-            .close {
-                color: #aaa;
-                float: right;
-                font-size: 28px;
-                font-weight: bold;
-            }
-            
-            .close:hover,
-            .close:focus {
-                color: black;
-                text-decoration: none;
-                cursor: pointer;
-            }
-            </style>
+
         
         
         
