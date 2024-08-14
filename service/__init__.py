@@ -50,7 +50,7 @@ def create_app():
     ######################################################################
     # Configure Swagger before initializing it
     ######################################################################
-    global api
+    global api  # pylint: disable=global-statement
     api = Api(
         app,
         version="1.0.0",

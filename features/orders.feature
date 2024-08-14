@@ -43,6 +43,13 @@ Feature: The Orders service back-end
         And I should see "727 Broadway NY 10003" in the results
         And I should see "728 Broadway NY 10003" in the results
 
+    Scenario: Read an Order
+        When I visit the "Home Page"
+        And I press the "readOrder" button
+        And I set the "readorder id" to existing order id
+        And I press the "fetchorder" button
+        Then I should see "200" in the "Status" span
+
     Scenario: Update an Order
         When I visit the "Home Page"
         And I press the "updateOrder" button
@@ -61,6 +68,7 @@ Feature: The Orders service back-end
         And I press the "viewallitems" button
         Then I should see "Glucose" in the item results
         And I should see "Candy" in the item results
+       
 
     # When I copy the "Id" field
     # And I press the "Clear" button
@@ -116,3 +124,4 @@ Feature: The Orders service back-end
         And I press the "DeleteCurrOrder" button
         And I press the "closedeleteOrderModal" button
         Then I should see "Deleted Successfully (204)" in the "Status" span
+   
