@@ -1,7 +1,7 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: Deployment 
 metadata:
-  name: orders
+  name: orders 
   labels:
     app: orders
 spec:
@@ -19,12 +19,10 @@ spec:
       labels:
         app: orders
     spec:
-      imagePullSecrets:
-        - name: all-icr-io
       restartPolicy: Always
       containers:
         - name: orders
-          image: cluster-registry:5000/orders:1.0
+          image: cluster-registry:5000/orders:latest
           # image: orders
           imagePullPolicy: IfNotPresent
           ports:

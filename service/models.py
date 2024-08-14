@@ -216,6 +216,7 @@ class Order(db.Model):
         """Serializes a Order into a dictionary"""
         order = {
             "id": self.id,
+            "order_id": self.id,
             "customer_id": self.customer_id,
             "shipping_address": self.shipping_address,
             "created_at": self.created_at,

@@ -104,15 +104,96 @@
 
     <div class="button-group" style="margin-bottom: 20px;">
         <button id="createorder-btn">Create an order</button>
+        <button id="updateorder-btn">Update an order</button>
+
         <button id="viewallorder-btn">View all orders</button>
         <button id="viewallitems-btn">View all items</button>
-        <button id="readOrderBtn">Read Order</button> <!-- Keep this button -->
+        <button id="deleteorder-btn">Delete an order</button>
+        <button id="readOrderBtn">Read Order</button> 
     </div>
        
 
 
 
-        <!-- The Modal -->
+        <br>
+
+        <button id="changeorderstatus-btn">Change Order Status</button>
+        <button id="searchbycustomerid-btn">Search by Customer ID</button>
+
+        <br>
+
+        <!-- Status Dropdown -->
+        <div class="form-group">
+            <div class="form-group">
+                <label for="order_status">Order Status:</label>
+                <select class="form-control" id="order_status" style="width: auto;">
+                    <option disabled selected>Select</option>
+                    <option value="CREATED">Created</option>
+                    <option value="PROCESSING">Processing</option>
+                    <option value="COMPLETED">Completed</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Customer ID Query Search -->
+        <div id="customerIdModal" class="modal">
+            <div class="modal-content">
+                <span class="close" id="closeCustomerIdModal-btn">&times;</span>
+                <form id="customerIdForm">
+                    <div class="form-group">
+                        <label for="customerId">Customer ID:</label>
+                        <input type="text" id="orders_customer_id" name="customerId" class="form-control"
+                            placeholder="Enter Customer ID" required>
+                    </div>
+                    <button type="submit" id="searchcustomerid-btn">Search</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Status Update -->
+        <div id="updateOrderStatusModal" class="modal">
+            <div class="modal-content">
+                <span class="close" id="closeUpdateOrderStatusModal-btn">&times;</span>
+                <form id="updateOrderStatusForm">
+                    <div class="form-group">
+                        <label for="orders_id_update">Order ID:</label>
+                        <input type="text" id="orders_id_update" class="form-control" placeholder="Enter Order ID" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new_order_status">New Status:</label>
+                        <select class="form-control" id="new_order_status">
+                            <option value="CREATED">Created</option>
+                            <option value="PROCESSING">Processing</option>
+                            <option value="COMPLETED">Completed</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" id="updatestatus-btn">Update Status</button>
+                </form>
+            </div>
+        </div>
+
+
+        <!-- Order Delete Modal -->
+        <div id="deleteOrderModal" class="modal">
+            <div class="modal-content">
+                <span class="close" id="closedeleteordermodal-btn">&times;</span>
+                <form id="orderIdForm">
+                    <div class="form-group">
+                        <label for="orderId">Order ID:</label>
+                        <input type="text" id="orders_order_id" name="deleteOrderId" class="form-control"
+                            placeholder="Enter Order ID" required>
+                        <span class="error" id="orderIdsError">Order ID is required</span>
+
+                    </div>
+                    <button type="submit" id="deletecurrorder-btn">Delete</button>
+                </form>
+            </div>
+        </div>
+
+
+        <!-- Create Order Modal -->
         <div id="orderModal" class="modal">
 
             <!-- Modal content -->
@@ -144,7 +225,45 @@
             </div>
 
         </div>
-        
+
+
+        <!-- UPDATE MODAL -->
+        <div id="updateorderModal" class="modal">
+
+            <!-- Modal content -->
+            <div class="modal-content">
+                <span class="close" id="updatecloseordermodal-btn">&times;</span>
+                <form id="updateorderForm">
+                    <!-- <div class="form-group">
+                        <label for="orderName">Order Name</label>
+                        <input type="text" id="orderName" name="orderName" required>
+                        <span class="error" id="orderNameError">Order Name is required</span>
+                    </div> -->
+                    <div class="form-group">
+                        <label for="orderID">Order ID</label>
+                        <input type="text" id="orders_id" name="orderID" required>
+                        <span class="error" id="itemIdsError">Order ID is required</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="itemIds">Item IDs (separated by commas)</label>
+                        <input type="text" id="orders_update_item_ids" name="itemIds" required>
+                        <span class="error" id="itemIdsError">Item IDs are required</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="itemQuantities">Item Quantities (separated by commas)</label>
+                        <input type="text" id="orders_update_item_quantities" name="itemQuantities" required>
+                        <span class="error" id="itemQuantitiesError">Item Quantities are required</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="shippingAddress">Shipping Address</label>
+                        <textarea id="orders_update_shipping_address" name="shippingAddress" required></textarea>
+                        <span class="error" id="shippingAddressError">Shipping Address is required</span>
+                    </div>
+                    <button type="submit" id="updatecurrorder-btn">Update Order</button>
+                </form>
+            </div>
+
+        </div>
         <!-- Search Results Orders -->
         <div class="table-responsive col-md-12" id="search_results">
             <table class="table table-striped">
@@ -180,13 +299,13 @@
         </div>
         <!-- Trigger the Modal -->
 <!-- The Modal -->
-<div id="readOrderModal" class="modal">
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <h2>Enter Order ID</h2>
-    <input type="text" id="orderIdInput" placeholder="Enter Order ID">
-    <button id="fetchOrderBtn">Fetch Order</button>
-  </div>
+        <div id="readOrderModal" class="modal">
+            <div class="modal-content">
+           <span class="close">&times;</span>
+           <h2>Enter Order ID</h2>
+           <input type="text" id="orderIdInput" placeholder="Enter Order ID">
+           <button id="fetchOrderBtn">Fetch Order</button>
+        </div>
 </div>
 <style>
 

@@ -63,7 +63,7 @@ def step_impl(context, element_name, text_string):
 
 @when('I select "{text}" in the "{element_name}" dropdown')
 def step_impl(context, text, element_name):
-    element_id = ID_PREFIX + element_name.lower().replace(" ", "_")
+    element_id = element_name.lower().replace(" ", "_")
     element = Select(context.driver.find_element(By.ID, element_id))
     element.select_by_visible_text(text)
 
@@ -150,7 +150,7 @@ def step_impl(context, name):
 def step_impl(context, message):
     found = WebDriverWait(context.driver, context.wait_seconds).until(
         expected_conditions.text_to_be_present_in_element(
-            (By.ID, "flash_message"), message
+            (By.ID, "orders_status"), message
         )
     )
     assert found
@@ -197,5 +197,17 @@ def step_impl(context, text_string, element_name):
     element_id = ID_PREFIX + element_name.lower().replace(" ", "_")
     span = context.driver.find_element(By.ID, element_id)
     text = span.get_attribute("innerHTML")
+    print(text)
 
     assert text == text_string
+
+
+@when('I set the "{element_name}" to existing order id')
+def step_impl(context, element_name):
+    element_id = ID_PREFIX + element_name.lower().replace(" ", "_")
+    element = WebDriverWait(context.driver, context.wait_seconds).until(
+        expected_conditions.presence_of_element_located((By.ID, element_id))
+    )
+    element.clear()
+    print(context.valid_order_id)
+    element.send_keys(context.valid_order_id)
